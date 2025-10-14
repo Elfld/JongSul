@@ -1,103 +1,127 @@
-import Image from "next/image";
+// app/page.tsx
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Header from '@/components/Header';
+import CategoryChips from '@/components/CategoryChips';
+import ItemCard from '@/components/ItemCard';
+import ItemModal from '@/components/ItemModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { useDebounce } from '@/lib/hooks/useDebounce';
+import { LostItem, ApiResponse } from '@/lib/types/lostItem';
+
+const categories = ['시계', '지갑', '카드', '인형', '가방', '우산', '열쇠', '핸드폰'];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedItem, setSelectedItem] = useState<LostItem | null>(null);
+  const [items, setItems] = useState<LostItem[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const debouncedTags = useDebounce(selectedTags, 300);
+
+  const fetchItems = useCallback(async (pageNum: number, reset: boolean = false) => {
+    setLoading(true);  // ← if (loading) return; 삭제
+    try {
+      const params = new URLSearchParams({
+        search: debouncedSearch,
+        tags: debouncedTags.join(','),
+        page: pageNum.toString(),
+        limit: '12',
+      });
+
+      const response = await fetch(`/api/items?${params}`);
+      const data: ApiResponse = await response.json();
+
+      setItems(prev => reset ? data.items : [...prev, ...data.items]);
+      setHasMore(data.hasMore);
+      setPage(pageNum);
+    } catch (error) {
+      console.error('Failed to fetch items:', error);
+    } finally {
+      setLoading(false);
+      setInitialLoading(false);
+    }
+  }, [debouncedSearch, debouncedTags]); // ← loading 제거
+
+  useEffect(() => {
+    setItems([]);
+    setPage(1);
+    setHasMore(true);
+    fetchItems(1, true);
+  }, [debouncedSearch, debouncedTags, fetchItems]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          fetchItems(page + 1, false);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loading, page, fetchItems]);
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleClearAll = () => {
+    setSelectedTags([]);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+      <div className="sticky top-0 z-40">
+        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <CategoryChips
+          categories={categories}
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          onClearAll={handleClearAll}
+        />
+      </div>
+
+      <main className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {items.map((item) => (
+            <ItemCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
+          ))}
         </div>
+
+        {items.length === 0 && !loading && (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-xl">검색 결과가 없습니다</p>
+          </div>
+        )}
+
+        <div ref={observerTarget} className="h-20">
+          {loading && <LoadingSpinner />}
+        </div>
+
+        {!hasMore && items.length > 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-400">모든 결과를 불러왔습니다</p>
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {selectedItem && <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
     </div>
   );
 }
