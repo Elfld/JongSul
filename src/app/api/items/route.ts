@@ -1,4 +1,5 @@
 // app/api/items/route.ts
+/*
 import { NextRequest, NextResponse } from 'next/server';
 import { LostItem } from '@/lib/types/lostItem';
 
@@ -41,4 +42,6 @@ export async function GET(request: NextRequest) {
     total: filtered.length,
     hasMore: endIndex < filtered.length,
   });
+
 }
+*/
