@@ -1,5 +1,4 @@
 // app/api/items/route.ts
-/*
 import { NextRequest, NextResponse } from 'next/server';
 import { LostItem } from '@/lib/types/lostItem';
 
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  let filtered = allMockData.filter((item) => {
+  const filtered = allMockData.filter((item) => {
     const tagMatch = tags.length === 0 || tags.includes(item.tag);
     const searchLower = search.toLowerCase();
     const searchMatch = 
@@ -44,4 +43,3 @@ export async function GET(request: NextRequest) {
   });
 
 }
-*/
