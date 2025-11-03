@@ -26,13 +26,13 @@ export default function CategoryChips({
   onClearAll,
 }: CategoryChipsProps) {
   // 드래그 스크롤 Hook 적용
-  const { containerRef, isDragging, handlers } = useDragScroll();
+  const { containerRef, isDragging, hasDragged, handlers } = useDragScroll();
 
   return (
     <div className="bg-white border-b border-sky-100 px-6 py-4">
       <div
         ref={containerRef}
-        className={`flex gap-3 overflow-x-auto scrollbar-hide ${
+        className={`flex gap-3 overflow-x-auto scrollbar-hide select-none ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         {...handlers}
@@ -40,12 +40,19 @@ export default function CategoryChips({
       >
         {/* 전체 해제 버튼 */}
         <button
-          onClick={onClearAll}
+          onClick={(e) => {
+            // 드래그 중이었다면 클릭 무시
+            if (hasDragged) {
+              e.preventDefault();
+              return;
+            }
+            onClearAll();
+          }}
           disabled={selectedTags.length === 0}
-          className={`flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all ${
+          className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
             selectedTags.length > 0
-              ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 cursor-pointer'
-              : 'bg-gray-200 border-gray-300 text-gray-600 opacity-50'
+              ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer'
+              : 'bg-gray-200 text-gray-600 opacity-50'
           }`}
         >
           <X className="w-4 h-4" />
@@ -55,11 +62,18 @@ export default function CategoryChips({
         {categories.map((tag) => (
           <button
             key={tag}
-            onClick={() => onTagToggle(tag)}
-            className={`flex-shrink-0 px-5 py-2 rounded-full border-2 transition-all ${
+            onClick={(e) => {
+              // 드래그 중이었다면 클릭 무시
+              if (hasDragged) {
+                e.preventDefault();
+                return;
+              }
+              onTagToggle(tag);
+            }}
+            className={`flex-shrink-0 px-5 py-2 rounded-full transition-all ${
               selectedTags.includes(tag)
-                ? 'bg-sky-500 border-sky-500 text-white hover:bg-sky-600'
-                : 'bg-white border-sky-300 text-sky-600 hover:bg-sky-50 hover:border-sky-400'
+                ? 'bg-sky-600 text-white hover:bg-sky-700'
+                : 'bg-sky-100 text-sky-700 hover:bg-sky-200'
             }`}
           >
             {tag}

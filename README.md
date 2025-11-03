@@ -134,6 +134,38 @@ git checkout claude/refactoring-oop-011CUYBKewmHneqRbkChDK3g
 npm install
 ```
 
+### 환경 변수 설정
+
+외부 API 서버를 사용하려면 환경 변수를 설정해야 합니다:
+
+```bash
+# 1. .env.local 파일 생성
+cp .env.local.example .env.local
+
+# 2. .env.local 파일을 열고 API 서버 주소 입력
+# NEXT_PUBLIC_API_URL=https://your-api-server.com
+```
+
+**환경 변수 예시**:
+```bash
+# 로컬 개발 서버 사용
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# 외부 API 서버 사용
+NEXT_PUBLIC_API_URL=https://api.example.com
+```
+
+**Health Check 테스트**:
+```bash
+# 서버 실행 후 브라우저에서 접속
+# http://localhost:3000/api/health
+
+# 또는 curl로 테스트
+curl http://localhost:3000/api/health
+```
+
+자세한 API 연동 가이드는 [docs/API_SETUP.md](./docs/API_SETUP.md) 참고
+
 ### 실행
 
 ```bash
