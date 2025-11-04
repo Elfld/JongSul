@@ -9,7 +9,7 @@ import ItemModal from '@/components/ItemModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useItemSearch } from '@/lib/hooks/useItemSearch';
 import { ItemResponse, TagResponse } from '@/lib/types/lostItem';
-import { TagService } from '@/lib/services/TagService';
+import { TagService } from '@/lib/api/tags';
 
 /**
  * 분실물 찾기 메인 페이지

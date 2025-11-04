@@ -1,7 +1,7 @@
 // lib/hooks/useItemSearch.ts
 import { useState, useCallback } from 'react';
 import { ItemResponse } from '@/lib/types/lostItem';
-import { ItemService } from '@/lib/services/ItemService';
+import { ItemService } from '@/lib/api/items';
 import { useDebounce } from './useDebounce';
 
 /**
