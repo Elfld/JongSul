@@ -1,19 +1,17 @@
 // lib/services/ItemService.ts
-import { LostItem, ApiResponse } from '@/lib/types/lostItem';
-
-export interface SearchParams {
-  search: string;
-  tags: string[];
-  page: number;
-  limit: number;
-}
+import { ItemResponse, SearchParams } from '@/lib/types/lostItem';
 
 /**
  * 분실물 아이템 관련 API 호출을 담당하는 Service 클래스
- * 의존성 역전 원칙(DIP)을 적용하여 API 호출 로직을 추상화
+ * OpenAPI 명세에 따라 구현됨
  *
  * 환경 변수:
  * - NEXT_PUBLIC_API_URL: API 서버 기본 URL (기본값: 현재 호스트)
+ *
+ * 엔드포인트:
+ * - GET /items/           : 전체 분실물 목록
+ * - GET /items/search     : 검색 (q, tags)
+ * - GET /items/{item_id}  : 단일 아이템 상세
  */
 export class ItemService {
   /**
@@ -30,20 +28,12 @@ export class ItemService {
   }
 
   /**
-   * 분실물 아이템 목록을 조회합니다
-   * @param params 검색 파라미터 (검색어, 태그, 페이지, 제한)
-   * @returns 아이템 목록과 페이지네이션 정보
+   * 전체 분실물 목록을 조회합니다
+   * @returns 아이템 목록
    */
-  static async fetchItems(params: SearchParams): Promise<ApiResponse> {
-    const queryParams = new URLSearchParams({
-      search: params.search,
-      tags: params.tags.join(','),
-      page: params.page.toString(),
-      limit: params.limit.toString(),
-    });
-
+  static async fetchAllItems(): Promise<ItemResponse[]> {
     const baseUrl = this.getBaseUrl();
-    const url = `${baseUrl}/api/items?${queryParams}`;
+    const url = `${baseUrl}/items/`;
 
     const response = await fetch(url);
 
@@ -55,13 +45,44 @@ export class ItemService {
   }
 
   /**
-   * 특정 아이템의 상세 정보를 조회합니다 (추후 확장용)
-   * @param id 아이템 ID
+   * 검색어 및/또는 태그로 분실물을 검색합니다
+   * @param params 검색 파라미터 (q: 검색어, tags: 태그 ID 배열)
+   * @returns 검색된 아이템 목록
+   */
+  static async searchItems(params: SearchParams): Promise<ItemResponse[]> {
+    const baseUrl = this.getBaseUrl();
+    const url = new URL(`${baseUrl}/items/search`);
+
+    // 검색어 추가 (있을 경우)
+    if (params.q && params.q.trim()) {
+      url.searchParams.append('q', params.q.trim());
+    }
+
+    // 태그 ID 추가 (있을 경우)
+    // tags=1&tags=2&tags=3 형태로 추가
+    if (params.tags && params.tags.length > 0) {
+      params.tags.forEach(tagId => {
+        url.searchParams.append('tags', tagId.toString());
+      });
+    }
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      throw new Error(`Failed to search items: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * 특정 아이템의 상세 정보를 조회합니다
+   * @param itemId 아이템 ID
    * @returns 아이템 상세 정보
    */
-  static async fetchItemById(id: string): Promise<LostItem> {
+  static async fetchItemById(itemId: number): Promise<ItemResponse> {
     const baseUrl = this.getBaseUrl();
-    const url = `${baseUrl}/api/items/${id}`;
+    const url = `${baseUrl}/items/${itemId}`;
 
     const response = await fetch(url);
 
@@ -94,3 +115,36 @@ export class ItemService {
     }
   }
 }
+
+/**
+ * ============================================================
+ * LEGACY - 이전 Mock API 코드 (참고용)
+ * ============================================================
+ */
+
+// export interface SearchParams {
+//   search: string;
+//   tags: string[];
+//   page: number;
+//   limit: number;
+// }
+
+// static async fetchItems(params: SearchParams): Promise<ApiResponse> {
+//   const queryParams = new URLSearchParams({
+//     search: params.search,
+//     tags: params.tags.join(','),
+//     page: params.page.toString(),
+//     limit: params.limit.toString(),
+//   });
+//
+//   const baseUrl = this.getBaseUrl();
+//   const url = `${baseUrl}/api/items?${queryParams}`;
+//
+//   const response = await fetch(url);
+//
+//   if (!response.ok) {
+//     throw new Error(`Failed to fetch items: ${response.statusText}`);
+//   }
+//
+//   return response.json();
+// }

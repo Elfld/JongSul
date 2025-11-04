@@ -1,29 +1,30 @@
 // app/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import CategoryChips from '@/components/CategoryChips';
 import ItemCard from '@/components/ItemCard';
 import ItemModal from '@/components/ItemModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useItemSearch } from '@/lib/hooks/useItemSearch';
-import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll';
-import { LostItem } from '@/lib/types/lostItem';
-
-const categories = ['시계', '지갑', '카드', '인형', '가방', '우산', '열쇠', '핸드폰'];
+import { ItemResponse, TagResponse } from '@/lib/types/lostItem';
+import { TagService } from '@/lib/services/TagService';
 
 /**
  * 분실물 찾기 메인 페이지
  *
- * 리팩토링 완료:
- * - Service Layer 분리 (ItemService)
- * - Custom Hooks 분리 (useItemSearch, useInfiniteScroll)
- * - 단일 책임 원칙(SRP) 적용
- * - 관심사 분리 적용
- * - 코드 라인 수: 127줄 → 82줄
+ * OpenAPI 명세 적용:
+ * - 태그를 ID 기반으로 관리
+ * - /tags/ 엔드포인트로 동적 태그 로드
+ * - /items/search 엔드포인트 사용
+ * - 무한 스크롤 제거 (서버에서 페이지네이션 미지원)
  */
 export default function Home() {
+  // 태그 목록 (API에서 로드)
+  const [availableTags, setAvailableTags] = useState<TagResponse[]>([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+
   // 검색 & 필터링 상태 관리 (Custom Hook)
   const {
     searchQuery,
@@ -36,49 +37,33 @@ export default function Home() {
     toggleTag,
     clearAllTags,
     fetchItems,
-    resetItems,
   } = useItemSearch();
 
-  // 페이지네이션 상태
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
-
   // 모달 상태
-  const [selectedItem, setSelectedItem] = useState<LostItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ItemResponse | null>(null);
 
-  // 검색어/필터 변경 시 초기화 및 재검색
+  // 태그 목록 로드 (컴포넌트 마운트 시 1회)
   useEffect(() => {
-    resetItems();
-    setPage(1);
-    setHasMore(true);
-
-    const loadInitialData = async () => {
-      const data = await fetchItems(1, true);
-      if (data) {
-        setHasMore(data.hasMore);
+    const loadTags = async () => {
+      try {
+        const tags = await TagService.fetchAllTags();
+        setAvailableTags(tags);
+      } catch (error) {
+        console.error('Failed to load tags:', error);
+      } finally {
+        setTagsLoading(false);
       }
-      setInitialLoading(false);
     };
 
-    loadInitialData();
-  }, [debouncedSearch, debouncedTags, fetchItems, resetItems]);
+    loadTags();
+  }, []);
 
-  // 무한 스크롤 콜백
-  const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
+  // 검색어/필터 변경 시 재검색
+  useEffect(() => {
+    if (tagsLoading) return; // 태그 로딩 중에는 검색하지 않음
 
-    const nextPage = page + 1;
-    const data = await fetchItems(nextPage, false);
-
-    if (data) {
-      setHasMore(data.hasMore);
-      setPage(nextPage);
-    }
-  }, [loading, hasMore, page, fetchItems]);
-
-  // 무한 스크롤 Hook 적용
-  const { observerTarget } = useInfiniteScroll(loadMore, { threshold: 0.5 });
+    fetchItems();
+  }, [debouncedSearch, debouncedTags, fetchItems, tagsLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
@@ -86,8 +71,8 @@ export default function Home() {
       <div className="sticky top-0 z-40">
         <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         <CategoryChips
-          categories={categories}
-          selectedTags={selectedTags}
+          tags={availableTags}
+          selectedTagIds={selectedTags}
           onTagToggle={toggleTag}
           onClearAll={clearAllTags}
         />
@@ -102,21 +87,16 @@ export default function Home() {
         </div>
 
         {/* 빈 상태 */}
-        {items.length === 0 && !loading && !initialLoading && (
+        {items.length === 0 && !loading && !tagsLoading && (
           <div className="text-center py-20">
             <p className="text-gray-400 text-xl">검색 결과가 없습니다</p>
           </div>
         )}
 
-        {/* 무한 스크롤 트리거 & 로딩 */}
-        <div ref={observerTarget} className="h-20">
-          {loading && <LoadingSpinner />}
-        </div>
-
-        {/* 모든 결과 로드 완료 메시지 */}
-        {!hasMore && items.length > 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-400">모든 결과를 불러왔습니다</p>
+        {/* 로딩 */}
+        {loading && (
+          <div className="flex justify-center py-20">
+            <LoadingSpinner />
           </div>
         )}
       </main>
@@ -126,3 +106,31 @@ export default function Home() {
     </div>
   );
 }
+
+/**
+ * ============================================================
+ * LEGACY - 이전 무한 스크롤 코드 (참고용)
+ * ============================================================
+ */
+
+// import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll';
+// const categories = ['시계', '지갑', '카드', '인형', '가방', '우산', '열쇠', '핸드폰'];
+
+// const [page, setPage] = useState(1);
+// const [hasMore, setHasMore] = useState(true);
+
+// const loadMore = useCallback(async () => {
+//   if (loading || !hasMore) return;
+//   const nextPage = page + 1;
+//   const data = await fetchItems(nextPage, false);
+//   if (data) {
+//     setHasMore(data.hasMore);
+//     setPage(nextPage);
+//   }
+// }, [loading, hasMore, page, fetchItems]);
+
+// const { observerTarget } = useInfiniteScroll(loadMore, { threshold: 0.5 });
+
+// <div ref={observerTarget} className="h-20">
+//   {loading && <LoadingSpinner />}
+// </div>
