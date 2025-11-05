@@ -1,6 +1,7 @@
 // components/ItemCard.tsx
 'use client';
 
+import Image from 'next/image';
 import { ItemResponse } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
@@ -30,9 +31,9 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
-      <div className="h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
+      <div className="relative h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
         {item.photo_url ? (
-          <img src={item.photo_url} alt={item.tags[0]?.name || '분실물'} className="w-full h-full object-cover" />
+          <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-cover" />
         ) : (
           <div className="text-sky-400 text-6xl">📦</div>
         )}
