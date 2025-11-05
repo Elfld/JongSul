@@ -1,35 +1,81 @@
 // components/ItemCard.tsx
 'use client';
 
-import { LostItem } from '@/lib/types/lostItem';
+import { ItemResponse } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
-  item: LostItem;
+  item: ItemResponse;
   onClick: () => void;
 }
 
+/**
+ * 분실물 카드 컴포넌트
+ *
+ * OpenAPI 명세 적용:
+ * - photo_url 사용
+ * - tags 배열 표시
+ * - registered_at datetime 포맷팅
+ * - location null 처리
+ */
 export default function ItemCard({ item, onClick }: ItemCardProps) {
+  // 날짜 포맷팅 (ISO 8601 → YYYY-MM-DD)
+  const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
   return (
     <div
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
       <div className="h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
-        {item.image ? (
-          <img src={item.image} alt={item.tag} className="w-full h-full object-cover" />
+        {item.photo_url ? (
+          <img src={item.photo_url} alt={item.tags[0]?.name || '분실물'} className="w-full h-full object-cover" />
         ) : (
           <div className="text-sky-400 text-6xl">📦</div>
         )}
       </div>
       <div className="p-4 bg-white">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
-            {item.tag}
-          </span>
+        {/* 태그 목록 (최대 3개 표시) */}
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          {item.tags.slice(0, 3).map((tag) => (
+            <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
+              {tag.name}
+            </span>
+          ))}
+          {item.tags.length > 3 && (
+            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+              +{item.tags.length - 3}
+            </span>
+          )}
         </div>
-        <p className="text-gray-600 text-sm mb-1">📍 {item.location}</p>
-        <p className="text-gray-500 text-xs">📅 {item.date}</p>
+        <p className="text-gray-600 text-sm mb-1">
+          📍 {item.location || '위치 정보 없음'}
+        </p>
+        <p className="text-gray-500 text-xs">📅 {formattedDate}</p>
       </div>
     </div>
   );
 }
+
+/**
+ * ============================================================
+ * LEGACY - 이전 LostItem 기반 코드 (참고용)
+ * ============================================================
+ */
+
+// import { LostItem } from '@/lib/types/lostItem';
+
+// interface ItemCardProps {
+//   item: LostItem;
+//   onClick: () => void;
+// }
+
+// <img src={item.image} alt={item.tag} className="w-full h-full object-cover" />
+// <span className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
+//   {item.tag}
+// </span>
+// <p className="text-gray-600 text-sm mb-1">📍 {item.location}</p>
+// <p className="text-gray-500 text-xs">📅 {item.date}</p>
