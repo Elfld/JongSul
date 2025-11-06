@@ -1,6 +1,7 @@
 // components/ItemModal.tsx
 'use client';
 
+import Image from 'next/image';
 import { X } from 'lucide-react';
 import { ItemResponse } from '@/lib/types/lostItem';
 
@@ -37,9 +38,9 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
         className="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
+        <div className="relative md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
           {item.photo_url ? (
-            <img src={item.photo_url} alt={item.tags[0]?.name || '분실물'} className="max-w-full max-h-full object-contain rounded-xl" />
+            <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-contain rounded-xl" />
           ) : (
             <div className="text-sky-400" style={{ fontSize: '12rem' }}>📦</div>
           )}
