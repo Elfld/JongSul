@@ -7,6 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
  * 역할: 클라이언트 요청을 외부 API 서버로 전달
  * 보안: API_BASE_URL이 서버에만 존재 (클라이언트에 노출 안 됨)
  *
+ * OpenAPI 명세:
+ * - q: 검색어 (optional)
+ * - tags: 태그 ID 배열 (optional, integer[])
+ *
  * GET /api/items/search?q=검색어&tags=1&tags=2
  */
 export async function GET(request: NextRequest) {
@@ -31,10 +35,14 @@ export async function GET(request: NextRequest) {
       externalUrl.searchParams.append(key, value);
     });
 
+    console.log('[API Proxy] External API URL:', externalUrl.toString());
+
     // 외부 API 호출
     const response = await fetch(externalUrl.toString());
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[API Proxy] External API error:', response.status, errorText);
       throw new Error(`External API error: ${response.status}`);
     }
 
