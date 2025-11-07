@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { ItemResponse } from '@/lib/types/lostItem';
 
 interface ItemModalProps {
@@ -22,12 +23,19 @@ interface ItemModalProps {
  * - description 제거 (API에 없음)
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
+  const router = useRouter();
+
   // 날짜 포맷팅 (ISO 8601 → YYYY년 MM월 DD일)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+
+  // 분실물 찾기 페이지로 이동
+  const handleClaimClick = () => {
+    router.push(`/claim/${item.id}`);
+  };
 
   return (
     <div
@@ -88,8 +96,11 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               </p>
             </div>
           </div>
-          <button className="mt-8 w-full bg-sky-500 text-white py-3 rounded-full font-semibold hover:bg-sky-600 transition-colors">
-            문의하기
+          <button
+            onClick={handleClaimClick}
+            className="mt-8 w-full bg-sky-500 text-white py-3 rounded-full font-semibold hover:bg-sky-600 transition-colors"
+          >
+            내 물건 찾기
           </button>
         </div>
       </div>
