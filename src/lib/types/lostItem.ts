@@ -13,7 +13,7 @@ export interface TagResponse {
 // 분실물 아이템 응답 타입
 export interface ItemResponse {
   id: number;
-  photo_url: string;
+  photo_url: string | null;
   location: string | null;
   status: string;
   registered_at: string; // ISO 8601 datetime

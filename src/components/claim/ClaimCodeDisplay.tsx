@@ -27,7 +27,7 @@ export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayPr
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       alert('복사에 실패했습니다.');
     }
   };
