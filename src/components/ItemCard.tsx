@@ -2,7 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ItemResponse } from '@/lib/types/lostItem';
+import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
   item: ItemResponse;
@@ -26,6 +26,10 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
     day: '2-digit',
   });
 
+  // 상태 정보 가져오기
+  const statusInfo = getStatusInfo(item.status);
+  const showStatusChip = statusInfo.index !== STATUS_INDEX.LOST;
+
   return (
     <div
       onClick={onClick}
@@ -39,7 +43,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
         )}
       </div>
       <div className="p-4 bg-white">
-        {/* 태그 목록 (최대 3개 표시) */}
+        {/* 태그 목록 (최대 3개 표시) + 상태 칩 */}
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           {item.tags.slice(0, 3).map((tag) => (
             <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
@@ -49,6 +53,18 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           {item.tags.length > 3 && (
             <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
               +{item.tags.length - 3}
+            </span>
+          )}
+          {/* 상태 칩 (예약중/수령완료만 표시) */}
+          {showStatusChip && (
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                statusInfo.index === STATUS_INDEX.STORED
+                  ? 'bg-pink-100 text-pink-600'
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {statusInfo.label}
             </span>
           )}
         </div>

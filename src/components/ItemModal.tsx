@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { ItemResponse } from '@/lib/types/lostItem';
+import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemModalProps {
   item: ItemResponse;
@@ -32,8 +32,15 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     day: 'numeric',
   });
 
+  // 상태 정보 가져오기
+  const statusInfo = getStatusInfo(item.status);
+  const isReserved = statusInfo.index === STATUS_INDEX.STORED;
+  const isPickedUp = statusInfo.index === STATUS_INDEX.FOUND;
+  const isButtonDisabled = isReserved || isPickedUp;
+
   // 분실물 찾기 페이지로 이동
   const handleClaimClick = () => {
+    if (isButtonDisabled) return;
     router.push(`/claim/${item.id}`);
   };
 
@@ -69,7 +76,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               <h3 className="text-sm font-semibold text-gray-500 mb-2">카테고리</h3>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
-                  <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
+                  <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-lg font-medium">
                     {tag.name}
                   </span>
                 ))}
@@ -79,28 +86,43 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
             {/* 상태 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">상태</h3>
-              <p className="text-lg text-gray-800">{item.status}</p>
+              <p
+                className={`text-lg font-medium ${
+                  isReserved
+                    ? 'text-pink-600'
+                    : isPickedUp
+                    ? 'text-gray-600'
+                    : 'text-gray-800'
+                }`}
+              >
+                {statusInfo.label}
+              </p>
             </div>
 
             {/* 등록 날짜 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">등록 날짜</h3>
-              <p className="text-lg text-gray-800">📅 {formattedDate}</p>
+              <p className="text-lg text-gray-800">{formattedDate}</p>
             </div>
 
             {/* 위치 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">분실함 위치</h3>
               <p className="text-lg text-gray-800">
-                📍 {item.location || '위치 정보 없음'}
+                {item.location || '위치 정보 없음'}
               </p>
             </div>
           </div>
           <button
             onClick={handleClaimClick}
-            className="mt-8 w-full bg-sky-500 text-white py-3 rounded-full font-semibold hover:bg-sky-600 transition-colors"
+            disabled={isButtonDisabled}
+            className={`mt-8 w-full py-3 rounded-full font-semibold transition-colors ${
+              isButtonDisabled
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-sky-500 text-white hover:bg-sky-600'
+            }`}
           >
-            내 물건 찾기
+            수령 예약하기
           </button>
         </div>
       </div>
