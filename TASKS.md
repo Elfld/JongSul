@@ -63,6 +63,34 @@
 
 ---
 
+### Phase 5: UI 통일성 개선
+**우선순위**: 🔥 높음
+
+#### 5.1 ItemCard 아이콘 통일 (확정)
+- [ ] 이모티콘 → lucide-react 아이콘 변경
+  - [ ] 📍 → MapPin 아이콘 (위치)
+  - [ ] 📅 → Calendar 아이콘 (날짜)
+  - [ ] lucide-react import 추가
+
+#### 5.2 ItemModal 아이콘 추가 (확정)
+- [ ] 텍스트 앞 아이콘 추가 (마이페이지 방식 적용)
+  - [ ] 카테고리: Package 아이콘
+  - [ ] 상태: AlertCircle/CheckCircle 아이콘
+  - [ ] 등록 날짜: Calendar 아이콘
+  - [ ] 분실함 위치: MapPin 아이콘
+  - [ ] lucide-react import 추가
+
+#### 5.3 마이페이지 카드 외곽선 개선 (의논)
+- [ ] 현재 문제: 배경과 카드 외곽선 구분 안됨
+- [ ] 해결 방안 검토:
+  - [ ] Option 1: border 추가 (border-gray-200)
+  - [ ] Option 2: shadow 강화 (shadow-sm → shadow-md)
+  - [ ] Option 3: 배경색 변경 (페이지 배경을 회색으로)
+  - [ ] Option 4: 조합 (border + shadow)
+- [ ] 사용자 의견 확인 후 적용
+
+---
+
 ### Phase 4: API 연동
 **우선순위**: 🔵 나중 (UI 완성 후)
 
