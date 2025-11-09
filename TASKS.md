@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09
+> 📅 최종 업데이트: 2025-11-09 16:30
 > 🔄 현재 브랜치: `claude/ui-improvements-for-main-011CUYBKewmHneqRbkChDK3g`
 
 ---
@@ -63,13 +63,13 @@
 
 ---
 
-### Phase 4: API 연동 (추후 진행)
-**우선순위**: 🟡 중간 (UI 완성 후)
+### Phase 4: API 연동
+**우선순위**: 🔵 나중 (UI 완성 후)
 
-- [ ] Backend API 엔드포인트 확인
-- [ ] ItemService 실제 API 연동
-- [ ] 마이페이지 API 연동
-- [ ] 에러 처리 및 피드백 강화
+- [ ] **(나중)** Backend API 엔드포인트 확인
+- [ ] **(나중)** ItemService 실제 API 연동
+- [ ] **(나중)** 마이페이지 API 연동
+- [ ] **(나중)** 에러 처리 및 피드백 강화
 
 ---
 
