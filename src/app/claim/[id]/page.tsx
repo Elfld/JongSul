@@ -26,19 +26,33 @@ export default function ClaimPage() {
   const [claimCode, setClaimCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string>('');
   const [imageError, setImageError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock 데이터: 실제로는 API로 item 정보를 가져와야 함
+  // 실제 API에서 분실물 정보 가져오기
   useEffect(() => {
-    // TODO: API 연동 시 실제 데이터 fetch
-    const mockItem: ItemResponse = {
-      id: parseInt(itemId),
-      registered_at: new Date().toISOString(),
-      location: '5호관',
-      status: 'LOST',
-      photo_url: null,
-      tags: [{ id: 1, name: '지갑' }],
-    };
-    setItem(mockItem);
+    async function fetchItem() {
+      try {
+        setError(null);
+        const response = await fetch(`/api/items/${itemId}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('분실물을 찾을 수 없습니다.');
+          } else {
+            setError('분실물 정보를 불러오는데 실패했습니다.');
+          }
+          return;
+        }
+
+        const data = await response.json();
+        setItem(data);
+      } catch (err) {
+        console.error('Failed to fetch item:', err);
+        setError('네트워크 오류가 발생했습니다.');
+      }
+    }
+
+    fetchItem();
   }, [itemId]);
 
   // 6자리 랜덤 코드 생성
@@ -72,6 +86,24 @@ export default function ClaimPage() {
     router.back();
   };
 
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-xl mb-4">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-3 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-colors"
+          >
+            돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 로딩 상태
   if (!item) {
     return (
       <div className="min-h-screen flex items-center justify-center">
