@@ -1,8 +1,10 @@
 // components/ItemCard.tsx
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { ItemResponse } from '@/lib/types/lostItem';
+import { Package } from 'lucide-react';
+import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
   item: ItemResponse;
@@ -19,6 +21,8 @@ interface ItemCardProps {
  * - location null 처리
  */
 export default function ItemCard({ item, onClick }: ItemCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   // 날짜 포맷팅 (ISO 8601 → YYYY-MM-DD)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -26,20 +30,30 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
     day: '2-digit',
   });
 
+  // 상태 정보 가져오기
+  const statusInfo = getStatusInfo(item.status);
+  const showStatusChip = statusInfo.index !== STATUS_INDEX.LOST;
+
   return (
     <div
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
       <div className="relative h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
-        {item.photo_url ? (
-          <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-cover" />
+        {item.photo_url && !imageError ? (
+          <Image
+            src={item.photo_url}
+            alt={item.tags[0]?.name || '분실물'}
+            fill
+            className="object-cover"
+            onError={() => setImageError(true)}
+          />
         ) : (
-          <div className="text-sky-400 text-6xl">📦</div>
+          <Package className="w-16 h-16 text-sky-400" />
         )}
       </div>
       <div className="p-4 bg-white">
-        {/* 태그 목록 (최대 3개 표시) */}
+        {/* 태그 목록 (최대 3개 표시) + 상태 칩 */}
         <div className="flex items-center gap-2 mb-2 flex-wrap">
           {item.tags.slice(0, 3).map((tag) => (
             <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
@@ -49,6 +63,18 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           {item.tags.length > 3 && (
             <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
               +{item.tags.length - 3}
+            </span>
+          )}
+          {/* 상태 칩 (예약중/수령완료만 표시) */}
+          {showStatusChip && (
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                statusInfo.index === STATUS_INDEX.STORED
+                  ? 'bg-pink-100 text-pink-600'
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {statusInfo.label}
             </span>
           )}
         </div>

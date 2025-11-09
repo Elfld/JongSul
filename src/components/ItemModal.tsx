@@ -1,9 +1,11 @@
 // components/ItemModal.tsx
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { X } from 'lucide-react';
-import { ItemResponse } from '@/lib/types/lostItem';
+import { X, Package } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemModalProps {
   item: ItemResponse;
@@ -22,12 +24,27 @@ interface ItemModalProps {
  * - description 제거 (API에 없음)
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
+  const router = useRouter();
+  const [imageError, setImageError] = useState(false);
+
   // 날짜 포맷팅 (ISO 8601 → YYYY년 MM월 DD일)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+
+  // 상태 정보 가져오기
+  const statusInfo = getStatusInfo(item.status);
+  const isReserved = statusInfo.index === STATUS_INDEX.STORED;
+  const isPickedUp = statusInfo.index === STATUS_INDEX.FOUND;
+  const isButtonDisabled = isReserved || isPickedUp;
+
+  // 분실물 찾기 페이지로 이동
+  const handleClaimClick = () => {
+    if (isButtonDisabled) return;
+    router.push(`/claim/${item.id}`);
+  };
 
   return (
     <div
@@ -39,10 +56,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
-          {item.photo_url ? (
-            <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-contain rounded-xl" />
+          {item.photo_url && !imageError ? (
+            <Image
+              src={item.photo_url}
+              alt={item.tags[0]?.name || '분실물'}
+              fill
+              className="object-contain rounded-xl"
+              onError={() => setImageError(true)}
+            />
           ) : (
-            <div className="text-sky-400" style={{ fontSize: '12rem' }}>📦</div>
+            <Package className="w-48 h-48 text-sky-400" />
           )}
         </div>
         <div className="md:w-1/3 p-8 overflow-y-auto flex flex-col">
@@ -61,7 +84,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               <h3 className="text-sm font-semibold text-gray-500 mb-2">카테고리</h3>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
-                  <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium">
+                  <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-lg font-medium">
                     {tag.name}
                   </span>
                 ))}
@@ -71,25 +94,43 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
             {/* 상태 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">상태</h3>
-              <p className="text-lg text-gray-800">{item.status}</p>
+              <p
+                className={`text-lg font-medium ${
+                  isReserved
+                    ? 'text-pink-600'
+                    : isPickedUp
+                    ? 'text-gray-600'
+                    : 'text-gray-800'
+                }`}
+              >
+                {statusInfo.label}
+              </p>
             </div>
 
             {/* 등록 날짜 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">등록 날짜</h3>
-              <p className="text-lg text-gray-800">📅 {formattedDate}</p>
+              <p className="text-lg text-gray-800">{formattedDate}</p>
             </div>
 
             {/* 위치 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">분실함 위치</h3>
               <p className="text-lg text-gray-800">
-                📍 {item.location || '위치 정보 없음'}
+                {item.location || '위치 정보 없음'}
               </p>
             </div>
           </div>
-          <button className="mt-8 w-full bg-sky-500 text-white py-3 rounded-full font-semibold hover:bg-sky-600 transition-colors">
-            문의하기
+          <button
+            onClick={handleClaimClick}
+            disabled={isButtonDisabled}
+            className={`mt-8 w-full py-3 rounded-full font-semibold transition-colors ${
+              isButtonDisabled
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-sky-500 text-white hover:bg-sky-600'
+            }`}
+          >
+            수령 예약하기
           </button>
         </div>
       </div>
