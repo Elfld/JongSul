@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09 16:50
+> 📅 최종 업데이트: 2025-11-09 16:55
 > 🔄 현재 브랜치: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
@@ -73,12 +73,12 @@
   - [x] lucide-react import 추가
 
 #### 5.2 ItemModal 아이콘 추가 (확정)
-- [ ] 텍스트 앞 아이콘 추가 (마이페이지 방식 적용)
-  - [ ] 카테고리: Package 아이콘
-  - [ ] 상태: AlertCircle/CheckCircle 아이콘
-  - [ ] 등록 날짜: Calendar 아이콘
-  - [ ] 분실함 위치: MapPin 아이콘
-  - [ ] lucide-react import 추가
+- [x] 텍스트 앞 아이콘 추가 (마이페이지 방식 적용)
+  - [x] 카테고리: Package 아이콘
+  - [x] 상태: AlertCircle/CheckCircle 아이콘
+  - [x] 등록 날짜: Calendar 아이콘
+  - [x] 분실함 위치: MapPin 아이콘
+  - [x] lucide-react import 추가
 
 #### 5.3 마이페이지 카드 외곽선 개선 (확정: Option 4)
 - [ ] ClaimedItemCard에 테두리 + 그림자 적용
