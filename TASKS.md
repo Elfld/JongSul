@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09 16:45
+> 📅 최종 업데이트: 2025-11-09 16:50
 > 🔄 현재 브랜치: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
@@ -67,10 +67,10 @@
 **우선순위**: 🔥 높음
 
 #### 5.1 ItemCard 아이콘 통일 (확정)
-- [ ] 이모티콘 → lucide-react 아이콘 변경
-  - [ ] 📍 → MapPin 아이콘 (위치)
-  - [ ] 📅 → Calendar 아이콘 (날짜)
-  - [ ] lucide-react import 추가
+- [x] 이모티콘 → lucide-react 아이콘 변경
+  - [x] 📍 → MapPin 아이콘 (위치)
+  - [x] 📅 → Calendar 아이콘 (날짜)
+  - [x] lucide-react import 추가
 
 #### 5.2 ItemModal 아이콘 추가 (확정)
 - [ ] 텍스트 앞 아이콘 추가 (마이페이지 방식 적용)

@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Package } from 'lucide-react';
+import { Package, MapPin, Calendar } from 'lucide-react';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
@@ -78,10 +78,14 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
             </span>
           )}
         </div>
-        <p className="text-gray-600 text-sm mb-1">
-          📍 {item.location || '위치 정보 없음'}
-        </p>
-        <p className="text-gray-500 text-xs">📅 {formattedDate}</p>
+        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <MapPin className="w-4 h-4 text-gray-500" />
+          <span>{item.location || '위치 정보 없음'}</span>
+        </div>
+        <div className="flex items-center gap-2 text-gray-500 text-xs">
+          <Calendar className="w-4 h-4" />
+          <span>{formattedDate}</span>
+        </div>
       </div>
     </div>
   );
