@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09 16:55
+> 📅 최종 업데이트: 2025-11-09 17:00
 > 🔄 현재 브랜치: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
@@ -81,10 +81,10 @@
   - [x] lucide-react import 추가
 
 #### 5.3 마이페이지 카드 외곽선 개선 (확정: Option 4)
-- [ ] ClaimedItemCard에 테두리 + 그림자 적용
-  - [ ] `border border-gray-100` 추가
-  - [ ] `shadow-sm` → `shadow-md`로 변경
-  - [ ] 빌드 및 시각적 확인
+- [x] ClaimedItemCard에 테두리 + 그림자 적용
+  - [x] `border border-gray-100` 추가
+  - [x] `shadow-sm` → `shadow-md`로 변경
+  - [x] 빌드 및 시각적 확인
 
 #### 5.4 서약서 페이지 상단 분실물 정보 개선 (확정)
 - [ ] 현재 문제: claim/[id] 페이지 상단 정보가 빈약함
