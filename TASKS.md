@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09 17:05
+> 📅 최종 업데이트: 2025-11-09 17:10
 > 🔄 현재 브랜치: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
@@ -61,9 +61,7 @@
 - [x] fallback UI 개선 (깨진 이미지 → 📦 소포 아이콘)
 - [x] ItemCard, ItemModal, ClaimedItemCard, MyPageItemDetailModal 모두 적용
 
----
-
-### Phase 5: UI 통일성 개선
+### Phase 5: UI 통일성 개선 (완료)
 **우선순위**: 🔥 높음
 
 #### 5.1 ItemCard 아이콘 통일 (확정)
@@ -100,6 +98,8 @@
   - [x] 빌드 및 시각적 확인
 
 ---
+
+## 📋 진행 예정 작업
 
 ### Phase 4: API 연동
 **우선순위**: 🔵 나중 (UI 완성 후)
