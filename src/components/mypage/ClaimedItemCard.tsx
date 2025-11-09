@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { Package, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 export interface ClaimedItem {
   id: number;
@@ -15,6 +16,7 @@ export interface ClaimedItem {
 
 interface ClaimedItemCardProps {
   item: ClaimedItem;
+  onClick?: () => void;
 }
 
 /**
@@ -26,7 +28,7 @@ interface ClaimedItemCardProps {
  * - 수령 상태 배지
  * - 유효기간 표시
  */
-export default function ClaimedItemCard({ item }: ClaimedItemCardProps) {
+export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps) {
   // 날짜 포맷팅
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     month: 'numeric',
@@ -41,7 +43,10 @@ export default function ClaimedItemCard({ item }: ClaimedItemCardProps) {
   const isPending = item.status === 'pending';
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex gap-4">
         {/* 이미지 */}
         <div className="relative w-24 h-24 flex-shrink-0 bg-gradient-to-br from-sky-100 to-sky-200 rounded-xl overflow-hidden">
@@ -53,8 +58,8 @@ export default function ClaimedItemCard({ item }: ClaimedItemCardProps) {
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl">
-              📦
+            <div className="w-full h-full flex items-center justify-center text-sky-400">
+              <Package className="w-12 h-12" />
             </div>
           )}
         </div>
@@ -66,45 +71,64 @@ export default function ClaimedItemCard({ item }: ClaimedItemCardProps) {
               {item.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="text-sm font-semibold text-sky-600"
+                  className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium border border-sky-200"
                 >
-                  #{tag}
+                  {tag}
                 </span>
               ))}
             </div>
 
             {/* 상태 배지 */}
             <span
-              className={`text-xs font-medium px-3 py-1 rounded-full ${
+              className={`text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1 ${
                 isPending
                   ? 'bg-yellow-100 text-yellow-700'
                   : 'bg-green-100 text-green-700'
               }`}
             >
-              {isPending ? '🟡 수령대기' : '✓ 수령완료'}
+              {isPending ? (
+                <>
+                  <AlertCircle className="w-3 h-3" />
+                  수령대기
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-3 h-3" />
+                  수령완료
+                </>
+              )}
             </span>
           </div>
 
-          <div className="space-y-1 text-sm text-gray-600">
-            <p>📍 {item.location}</p>
-            <p>📅 {formattedDate}</p>
+          <div className="space-y-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <span>{item.location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <span>{formattedDate}</span>
+            </div>
 
             {/* 수령 코드 */}
             {isPending && (
-              <p className="font-semibold text-sky-600">
-                🔑 코드: {item.code}
-              </p>
+              <div className="flex items-center gap-2 font-semibold text-sky-600">
+                <Key className="w-4 h-4" />
+                <span>코드: {item.code}</span>
+              </div>
             )}
 
             {/* 유효기간 또는 수령 완료 메시지 */}
             {isPending ? (
-              <p className="text-xs text-gray-500">
-                ⏰ ~{formattedExpires}까지
-              </p>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Clock className="w-4 h-4" />
+                <span>~{formattedExpires}까지</span>
+              </div>
             ) : (
-              <p className="text-xs text-green-600 font-medium">
-                ✓ 수령 완료
-              </p>
+              <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
+                <CheckCircle className="w-4 h-4" />
+                <span>수령 완료</span>
+              </div>
             )}
           </div>
         </div>

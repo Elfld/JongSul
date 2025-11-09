@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Package } from 'lucide-react';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
 import ClaimedItemCard, { ClaimedItem } from '@/components/mypage/ClaimedItemCard';
+import MyPageItemDetailModal from '@/components/mypage/MyPageItemDetailModal';
+import CancelReservationModal from '@/components/mypage/CancelReservationModal';
 
 /**
  * 마이페이지
@@ -49,9 +52,40 @@ const mockClaimedItems: ClaimedItem[] = [
 
 export default function MyPage() {
   const router = useRouter();
+  const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const handleGoHome = () => {
     router.push('/');
+  };
+
+  // 분실물 카드 클릭 핸들러
+  const handleItemClick = (item: ClaimedItem) => {
+    setSelectedItem(item);
+  };
+
+  // 상세 모달 닫기
+  const handleCloseDetailModal = () => {
+    setSelectedItem(null);
+    setShowCancelModal(false);
+  };
+
+  // 예약 취소 버튼 클릭
+  const handleCancelReservation = () => {
+    setShowCancelModal(true);
+  };
+
+  // 취소 확정
+  const handleConfirmCancel = (reason: string) => {
+    // TODO: API 호출 - 예약 취소 요청
+    console.log('예약 취소:', selectedItem?.id, '사유:', reason);
+
+    // TODO: 성공 시 목록에서 제거 또는 상태 업데이트
+    alert(`예약이 취소되었습니다.\n사유: ${reason}`);
+
+    // 모든 모달 닫기
+    setShowCancelModal(false);
+    setSelectedItem(null);
   };
 
   // 수령 대기 / 완료 분리
@@ -90,7 +124,11 @@ export default function MyPage() {
           {pendingItems.length > 0 ? (
             <div className="space-y-4 mb-6">
               {pendingItems.map((item) => (
-                <ClaimedItemCard key={item.id} item={item} />
+                <ClaimedItemCard
+                  key={item.id}
+                  item={item}
+                  onClick={() => handleItemClick(item)}
+                />
               ))}
             </div>
           ) : (
@@ -108,7 +146,11 @@ export default function MyPage() {
               </h3>
               <div className="space-y-4 opacity-75">
                 {completedItems.map((item) => (
-                  <ClaimedItemCard key={item.id} item={item} />
+                  <ClaimedItemCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => handleItemClick(item)}
+                  />
                 ))}
               </div>
             </>
@@ -125,6 +167,23 @@ export default function MyPage() {
           </button>
         </div>
       </div>
+
+      {/* 상세 모달 */}
+      {selectedItem && (
+        <MyPageItemDetailModal
+          item={selectedItem}
+          onClose={handleCloseDetailModal}
+          onCancelReservation={handleCancelReservation}
+        />
+      )}
+
+      {/* 취소 확인 모달 */}
+      {showCancelModal && (
+        <CancelReservationModal
+          onClose={() => setShowCancelModal(false)}
+          onConfirm={handleConfirmCancel}
+        />
+      )}
     </div>
   );
 }
