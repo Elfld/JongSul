@@ -1,6 +1,6 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-09 16:35
+> 📅 최종 업데이트: 2025-11-09 16:45
 > 🔄 현재 브랜치: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
@@ -80,14 +80,24 @@
   - [ ] 분실함 위치: MapPin 아이콘
   - [ ] lucide-react import 추가
 
-#### 5.3 마이페이지 카드 외곽선 개선 (의논)
-- [ ] 현재 문제: 배경과 카드 외곽선 구분 안됨
-- [ ] 해결 방안 검토:
-  - [ ] Option 1: border 추가 (border-gray-200)
-  - [ ] Option 2: shadow 강화 (shadow-sm → shadow-md)
-  - [ ] Option 3: 배경색 변경 (페이지 배경을 회색으로)
-  - [ ] Option 4: 조합 (border + shadow)
-- [ ] 사용자 의견 확인 후 적용
+#### 5.3 마이페이지 카드 외곽선 개선 (확정: Option 4)
+- [ ] ClaimedItemCard에 테두리 + 그림자 적용
+  - [ ] `border border-gray-100` 추가
+  - [ ] `shadow-sm` → `shadow-md`로 변경
+  - [ ] 빌드 및 시각적 확인
+
+#### 5.4 서약서 페이지 상단 분실물 정보 개선 (확정)
+- [ ] 현재 문제: claim/[id] 페이지 상단 정보가 빈약함
+- [ ] 사용자 경험 개선: 모달 → 서약서 이동 시 분실물 정보 연속성 제공
+- [ ] 구현 방향:
+  - [ ] 좌측: 이미지 크게 표시 (현재보다 크게)
+  - [ ] 우측: ClaimedItemCard 스타일 레이아웃 적용
+    - [ ] 태그 표시 (lucide-react 아이콘)
+    - [ ] 위치 표시 (MapPin 아이콘)
+    - [ ] 등록 날짜 표시 (Calendar 아이콘)
+    - [ ] ⚠️ 코드/예약날짜/수령대기 배지는 제외 (아직 예약 전)
+  - [ ] 반응형 레이아웃 (모바일: 세로 배치)
+  - [ ] 빌드 및 시각적 확인
 
 ---
 
