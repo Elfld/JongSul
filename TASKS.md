@@ -57,9 +57,9 @@
   - 추가 구현 필요 (사용자 예약 상태 확인 로직)
 
 #### 3.2 이미지 로드 실패 처리
-- [ ] 이미지 로드 실패 감지 (onError 핸들러)
-- [ ] fallback UI 개선 (깨진 이미지 → 📦 소포 아이콘)
-- [ ] ItemCard, ItemModal, ClaimedItemCard, MyPageItemDetailModal 모두 적용
+- [x] 이미지 로드 실패 감지 (onError 핸들러)
+- [x] fallback UI 개선 (깨진 이미지 → 📦 소포 아이콘)
+- [x] ItemCard, ItemModal, ClaimedItemCard, MyPageItemDetailModal 모두 적용
 
 ---
 

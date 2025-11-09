@@ -1,7 +1,9 @@
 // components/ItemCard.tsx
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
+import { Package } from 'lucide-react';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
@@ -19,6 +21,8 @@ interface ItemCardProps {
  * - location null 처리
  */
 export default function ItemCard({ item, onClick }: ItemCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   // 날짜 포맷팅 (ISO 8601 → YYYY-MM-DD)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -36,10 +40,16 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
       <div className="relative h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
-        {item.photo_url ? (
-          <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-cover" />
+        {item.photo_url && !imageError ? (
+          <Image
+            src={item.photo_url}
+            alt={item.tags[0]?.name || '분실물'}
+            fill
+            className="object-cover"
+            onError={() => setImageError(true)}
+          />
         ) : (
-          <div className="text-sky-400 text-6xl">📦</div>
+          <Package className="w-16 h-16 text-sky-400" />
         )}
       </div>
       <div className="p-4 bg-white">

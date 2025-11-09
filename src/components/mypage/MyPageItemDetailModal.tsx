@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { X, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle, Package } from 'lucide-react';
 import { ClaimedItem } from './ClaimedItemCard';
 
 interface MyPageItemDetailModalProps {
@@ -23,6 +24,8 @@ export default function MyPageItemDetailModal({
   onClose,
   onCancelReservation,
 }: MyPageItemDetailModalProps) {
+  const [imageError, setImageError] = useState(false);
+
   // 날짜 포맷팅
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -55,17 +58,16 @@ export default function MyPageItemDetailModal({
       >
         {/* 왼쪽: 이미지 영역 */}
         <div className="relative md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
-          {item.photo_url ? (
+          {item.photo_url && !imageError ? (
             <Image
               src={item.photo_url}
               alt={item.tags[0] || '분실물'}
               fill
               className="object-contain rounded-xl"
+              onError={() => setImageError(true)}
             />
           ) : (
-            <div className="text-sky-400" style={{ fontSize: '12rem' }}>
-              📦
-            </div>
+            <Package className="w-48 h-48 text-sky-400" />
           )}
         </div>
 

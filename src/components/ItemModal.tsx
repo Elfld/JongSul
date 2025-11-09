@@ -1,8 +1,9 @@
 // components/ItemModal.tsx
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { X } from 'lucide-react';
+import { X, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
@@ -24,6 +25,7 @@ interface ItemModalProps {
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
   const router = useRouter();
+  const [imageError, setImageError] = useState(false);
 
   // 날짜 포맷팅 (ISO 8601 → YYYY년 MM월 DD일)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
@@ -54,10 +56,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
-          {item.photo_url ? (
-            <Image src={item.photo_url} alt={item.tags[0]?.name || '분실물'} fill className="object-contain rounded-xl" />
+          {item.photo_url && !imageError ? (
+            <Image
+              src={item.photo_url}
+              alt={item.tags[0]?.name || '분실물'}
+              fill
+              className="object-contain rounded-xl"
+              onError={() => setImageError(true)}
+            />
           ) : (
-            <div className="text-sky-400" style={{ fontSize: '12rem' }}>📦</div>
+            <Package className="w-48 h-48 text-sky-400" />
           )}
         </div>
         <div className="md:w-1/3 p-8 overflow-y-auto flex flex-col">

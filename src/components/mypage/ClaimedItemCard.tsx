@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { Package, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -29,6 +30,8 @@ interface ClaimedItemCardProps {
  * - 유효기간 표시
  */
 export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   // 날짜 포맷팅
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
     month: 'numeric',
@@ -50,12 +53,13 @@ export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps)
       <div className="flex gap-4">
         {/* 이미지 */}
         <div className="relative w-24 h-24 flex-shrink-0 bg-gradient-to-br from-sky-100 to-sky-200 rounded-xl overflow-hidden">
-          {item.photo_url ? (
+          {item.photo_url && !imageError ? (
             <Image
               src={item.photo_url}
               alt={item.tags[0] || '분실물'}
               fill
               className="object-cover"
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-sky-400">
