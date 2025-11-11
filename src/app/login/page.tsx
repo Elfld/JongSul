@@ -1,28 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { User, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 /**
- * 로그인 페이지
- *
- * 기능:
- * - 이메일/비밀번호 입력
- * - 로그인 처리
- * - 이미 로그인된 경우 메인 페이지로 리다이렉트
- * - 회원가입 페이지 링크
+ * 로그인 컴포넌트 (내부)
  */
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // 회원가입 후 성공 메시지
+  const successMessage = searchParams.get('message');
 
   // 이미 로그인된 경우 메인 페이지로 리다이렉트
   useEffect(() => {
@@ -69,6 +67,13 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
             로그인
           </h1>
+
+          {/* 성공 메시지 (회원가입 후) */}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-700 text-sm">{successMessage}</p>
+            </div>
+          )}
 
           {/* 에러 메시지 */}
           {error && (
@@ -154,5 +159,29 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+/**
+ * 로그인 페이지
+ *
+ * 기능:
+ * - 이메일/비밀번호 입력
+ * - 로그인 처리
+ * - 이미 로그인된 경우 메인 페이지로 리다이렉트
+ * - 회원가입 페이지 링크
+ * - 회원가입 후 성공 메시지 표시
+ */
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
