@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
 interface ItemModalProps {
@@ -25,6 +26,7 @@ interface ItemModalProps {
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [imageError, setImageError] = useState(false);
 
   // 날짜 포맷팅 (ISO 8601 → YYYY년 MM월 DD일)
@@ -43,6 +45,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
   // 분실물 찾기 페이지로 이동
   const handleClaimClick = () => {
     if (isButtonDisabled) return;
+
+    // 로그인 확인
+    if (!isAuthenticated) {
+      const confirmed = window.confirm('로그인이 필요한 기능입니다. 로그인하시겠습니까?');
+      if (confirmed) {
+        router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
+      }
+      return;
+    }
+
     router.push(`/claim/${item.id}`);
   };
 
