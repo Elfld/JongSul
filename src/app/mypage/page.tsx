@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Package } from 'lucide-react';
+import { ArrowLeft, Package, LogOut } from 'lucide-react';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
 import ClaimedItemCard, { ClaimedItem } from '@/components/mypage/ClaimedItemCard';
 import MyPageItemDetailModal from '@/components/mypage/MyPageItemDetailModal';
@@ -52,10 +53,16 @@ const mockClaimedItems: ClaimedItem[] = [
 
 export default function MyPage() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const handleGoHome = () => {
+    router.push('/');
+  };
+
+  const handleLogout = () => {
+    logout();
     router.push('/');
   };
 
@@ -96,14 +103,25 @@ export default function MyPage() {
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 헤더 */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleGoHome}
+              className="p-2 hover:bg-white rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
+          </div>
+
+          {/* 로그아웃 버튼 */}
           <button
-            onClick={handleGoHome}
-            className="p-2 hover:bg-white rounded-full transition-colors"
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">로그아웃</span>
           </button>
-          <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
         </div>
 
         {/* 섹션 1: 알림 설정 */}

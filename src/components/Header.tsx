@@ -3,6 +3,7 @@
 
 import { Search, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface HeaderProps {
   searchQuery: string;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   return (
     <header className="bg-gradient-to-b from-sky-50 to-white border-b border-sky-100 px-6 py-4 flex items-center justify-between">
@@ -29,7 +31,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
         </div>
 
         <button
-          onClick={() => router.push('/mypage')}
+          onClick={() => router.push(isAuthenticated ? '/mypage' : '/login')}
           className="flex-shrink-0 w-10 h-10 rounded-full bg-sky-500 hover:bg-sky-600 flex items-center justify-center text-white transition-colors shadow-md hover:shadow-lg"
           aria-label="마이페이지"
         >
