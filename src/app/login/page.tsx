@@ -65,7 +65,7 @@ function LoginForm() {
       {/* 홈으로 버튼 - 화면 좌상단 고정 */}
       <Link
         href="/"
-        className="fixed top-6 left-6 inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors z-10"
+        className="fixed top-6 left-6 px-3 py-1 inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors z-10"
       >
         <ArrowLeft className="w-5 h-5 flex-shrink-0" />
         <span className="font-medium whitespace-nowrap">홈으로</span>
