@@ -19,15 +19,16 @@ function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 회원가입 후 성공 메시지
+  // 회원가입 후 성공 메시지 또는 로그인 필요 메시지
   const successMessage = searchParams.get('message');
+  const redirectPath = searchParams.get('redirect') || '/';
 
-  // 이미 로그인된 경우 메인 페이지로 리다이렉트
+  // 이미 로그인된 경우 리다이렉트
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/');
+      router.push(redirectPath);
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, redirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,8 @@ function LoginForm() {
 
     try {
       await login(email, password);
-      router.push('/'); // 로그인 성공 → 메인 페이지
+      // 로그인 성공 → redirect 파라미터가 있으면 해당 페이지로, 없으면 메인 페이지
+      router.push(redirectPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : '로그인에 실패했습니다.');
     } finally {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Package, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -53,9 +53,16 @@ const mockClaimedItems: ClaimedItem[] = [
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // 인증 가드: 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login?redirect=/mypage&message=로그인이 필요한 페이지입니다.');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleGoHome = () => {
     router.push('/');
