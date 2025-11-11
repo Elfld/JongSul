@@ -47,7 +47,7 @@ export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps)
 
   return (
     <div
-      className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white rounded-2xl p-6 border border-gray-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
       onClick={onClick}
     >
       <div className="flex gap-4">

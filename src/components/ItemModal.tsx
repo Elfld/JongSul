@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { X, Package } from 'lucide-react';
+import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
 
@@ -81,7 +81,10 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
           <div className="space-y-6 flex-grow">
             {/* 태그 목록 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">카테고리</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-500">카테고리</h3>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
                   <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-lg font-medium">
@@ -93,7 +96,14 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
             {/* 상태 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">상태</h3>
+              <div className="flex items-center gap-2 mb-2">
+                {isReserved || isPickedUp ? (
+                  <CheckCircle className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-gray-500" />
+                )}
+                <h3 className="text-sm font-semibold text-gray-500">상태</h3>
+              </div>
               <p
                 className={`text-lg font-medium ${
                   isReserved
@@ -109,13 +119,19 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
             {/* 등록 날짜 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">등록 날짜</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-500">등록 날짜</h3>
+              </div>
               <p className="text-lg text-gray-800">{formattedDate}</p>
             </div>
 
             {/* 위치 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">분실함 위치</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-500">분실함 위치</h3>
+              </div>
               <p className="text-lg text-gray-800">
                 {item.location || '위치 정보 없음'}
               </p>
