@@ -1,0 +1,169 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+/**
+ * 인증 사용자 정보
+ */
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  phone?: string;
+}
+
+/**
+ * 인증 컨텍스트 타입
+ */
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string, phone: string) => Promise<void>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * 인증 컨텍스트 Provider
+ *
+ * 역할:
+ * - 전역 인증 상태 관리 (user, token)
+ * - localStorage에 token 저장/로드
+ * - login/register/logout 함수 제공
+ */
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 컴포넌트 마운트 시 localStorage에서 토큰 로드
+  useEffect(() => {
+    const savedToken = localStorage.getItem('access_token');
+    if (savedToken) {
+      setToken(savedToken);
+      // TODO: 토큰으로 사용자 정보 조회 API 필요 시 구현
+      // 현재는 로그인 응답에 user 정보가 없어서 email만 임시 저장
+    }
+    setIsLoading(false);
+  }, []);
+
+  /**
+   * 로그인
+   * @param email 이메일
+   * @param password 비밀번호
+   */
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '로그인에 실패했습니다.');
+      }
+
+      const data = await response.json();
+
+      // OpenAPI 명세: { access_token, token_type }
+      setToken(data.access_token);
+      localStorage.setItem('access_token', data.access_token);
+
+      // user 정보는 서버에서 안 주므로 email만 임시 저장
+      setUser({ email });
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * 회원가입
+   * @param email 이메일
+   * @param password 비밀번호
+   * @param name 이름
+   * @param phone 연락처
+   *
+   * 주의: 자동 로그인 안 함. UI에서 로그인 페이지로 이동 처리
+   */
+  const register = async (
+    email: string,
+    password: string,
+    name: string,
+    phone: string
+  ) => {
+    try {
+      const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          contact_info: phone,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '회원가입에 실패했습니다.');
+      }
+
+      // 회원가입 성공
+      // OpenAPI 명세: { id, email, name }
+      // 자동 로그인 안 함 - UI에서 로그인 페이지로 이동
+      const data = await response.json();
+      console.log('회원가입 성공:', data);
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * 로그아웃
+   */
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('access_token');
+  };
+
+  const value: AuthContextType = {
+    user,
+    token,
+    isAuthenticated: !!token,
+    login,
+    register,
+    logout,
+    isLoading,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/**
+ * useAuth Hook
+ *
+ * 사용법:
+ * ```tsx
+ * const { user, isAuthenticated, login, logout } = useAuth();
+ * ```
+ */
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
