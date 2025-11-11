@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { User, Lock, Loader2 } from 'lucide-react';
+import { User, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -63,6 +63,15 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
+        {/* 홈으로 버튼 */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-medium">홈으로</span>
+        </Link>
+
         {/* 컨테이너 */}
         <div className="bg-white shadow-lg rounded-lg p-8">
           {/* 제목 */}

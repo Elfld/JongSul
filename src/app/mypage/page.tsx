@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Package, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -56,10 +56,11 @@ export default function MyPage() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const isLoggingOut = useRef(false);
 
   // 인증 가드: 로그인하지 않은 경우 로그인 페이지로 리다이렉트
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !isLoggingOut.current) {
       router.push('/login?redirect=/mypage&message=로그인이 필요한 페이지입니다.');
     }
   }, [isAuthenticated, isLoading, router]);
@@ -69,8 +70,9 @@ export default function MyPage() {
   };
 
   const handleLogout = () => {
+    isLoggingOut.current = true;
     logout();
-    router.push('/');
+    router.replace('/');
   };
 
   // 분실물 카드 클릭 핸들러
