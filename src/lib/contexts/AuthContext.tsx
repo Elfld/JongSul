@@ -68,7 +68,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '로그인에 실패했습니다.');
+        const errorMessage = errorData.error || '로그인에 실패했습니다.';
+
+        // 401, 404는 정상적인 비즈니스 로직 (로그 안 남김)
+        // 500번대나 네트워크 에러만 로깅
+        if (response.status >= 500) {
+          console.error('Login server error:', response.status, errorData);
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -80,7 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // user 정보는 서버에서 안 주므로 email만 임시 저장
       setUser({ email });
     } catch (error) {
-      console.error('Login error:', error);
+      // Error 객체가 아닌 경우만 로깅 (네트워크 에러 등)
+      if (!(error instanceof Error)) {
+        console.error('Login network error:', error);
+      }
       throw error;
     }
   };
@@ -116,16 +127,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '회원가입에 실패했습니다.');
+        const errorMessage = errorData.error || '회원가입에 실패했습니다.';
+
+        // 409(중복), 400(유효성)은 정상 비즈니스 로직 (로그 안 남김)
+        // 500번대만 로깅
+        if (response.status >= 500) {
+          console.error('Register server error:', response.status, errorData);
+        }
+
+        throw new Error(errorMessage);
       }
 
       // 회원가입 성공
       // OpenAPI 명세: { id, email, name }
       // 자동 로그인 안 함 - UI에서 로그인 페이지로 이동
-      const data = await response.json();
-      console.log('회원가입 성공:', data);
+      await response.json();
     } catch (error) {
-      console.error('Register error:', error);
+      // Error 객체가 아닌 경우만 로깅 (네트워크 에러 등)
+      if (!(error instanceof Error)) {
+        console.error('Register network error:', error);
+      }
       throw error;
     }
   };

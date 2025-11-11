@@ -53,7 +53,7 @@ const mockClaimedItems: ClaimedItem[] = [
 
 export default function MyPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -114,14 +114,24 @@ export default function MyPage() {
             <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
           </div>
 
-          {/* 로그아웃 버튼 */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white rounded-lg transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">로그아웃</span>
-          </button>
+          {/* 계정 정보 */}
+          <div className="flex items-center gap-3">
+            {/* 이메일 */}
+            {user?.email && (
+              <span className="text-sm text-gray-600 bg-white px-3 py-2 rounded-lg">
+                {user.email}
+              </span>
+            )}
+
+            {/* 로그아웃 버튼 */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">로그아웃</span>
+            </button>
+          </div>
         </div>
 
         {/* 섹션 1: 알림 설정 */}
