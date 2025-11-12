@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Package, MapPin, Calendar } from 'lucide-react';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import ClaimAgreement from '@/components/claim/ClaimAgreement';
 import ClaimCodeDisplay from '@/components/claim/ClaimCodeDisplay';
 import { ItemResponse } from '@/lib/types/lostItem';
@@ -19,6 +20,7 @@ import { ItemResponse } from '@/lib/types/lostItem';
 export default function ClaimPage() {
   const router = useRouter();
   const params = useParams();
+  const { isAuthenticated } = useAuth();
   const itemId = params.id as string;
 
   const [item, setItem] = useState<ItemResponse | null>(null);
@@ -70,6 +72,12 @@ export default function ClaimPage() {
 
   // 동의 처리
   const handleAgree = () => {
+    // 로그인 체크: 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/claim/${itemId}&message=소유권 주장을 위해 로그인이 필요합니다.`);
+      return;
+    }
+
     const code = generateClaimCode();
     const expires = calculateExpiresAt();
 

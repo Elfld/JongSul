@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Package } from 'lucide-react';
+import { ArrowLeft, Package, LogOut } from 'lucide-react';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
 import ClaimedItemCard, { ClaimedItem } from '@/components/mypage/ClaimedItemCard';
 import MyPageItemDetailModal from '@/components/mypage/MyPageItemDetailModal';
@@ -52,11 +53,26 @@ const mockClaimedItems: ClaimedItem[] = [
 
 export default function MyPage() {
   const router = useRouter();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const isLoggingOut = useRef(false);
+
+  // 인증 가드: 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !isLoggingOut.current) {
+      router.push('/login?redirect=/mypage&message=로그인이 필요한 페이지입니다.');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleGoHome = () => {
     router.push('/');
+  };
+
+  const handleLogout = () => {
+    isLoggingOut.current = true;
+    logout();
+    router.replace('/');
   };
 
   // 분실물 카드 클릭 핸들러
@@ -96,14 +112,35 @@ export default function MyPage() {
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 헤더 */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={handleGoHome}
-            className="p-2 hover:bg-white rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
-          <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleGoHome}
+              className="p-2 hover:bg-white rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
+          </div>
+
+          {/* 계정 정보 */}
+          <div className="flex items-center gap-3">
+            {/* 이메일 */}
+            {user?.email && (
+              <span className="text-sm text-gray-600 bg-white px-3 py-2 rounded-lg">
+                {user.email}
+              </span>
+            )}
+
+            {/* 로그아웃 버튼 */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">로그아웃</span>
+            </button>
+          </div>
         </div>
 
         {/* 섹션 1: 알림 설정 */}

@@ -2,16 +2,16 @@
 
 > 새 세션 시작 시 이 문서를 먼저 읽고 작업을 시작하세요.
 >
-> **마지막 업데이트**: 2025-11-09 17:15
-> **현재 브랜치**: `claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC`
+> **마지막 업데이트**: 2025-11-11
+> **현재 브랜치**: `claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC`
 
 ---
 
 ## 📌 빠른 개요
 
 **프로젝트**: 분실물 관리 시스템 (웹 + 키오스크)
-**현재 단계**: Phase 5 완료 (UI 통일성 개선)
-**다음 작업**: Phase 4 (API 연동) - 나중 예정
+**현재 단계**: Phase 6.1 완료 (Claim 페이지 API 연동)
+**다음 작업**: Phase 7.1 (인증 시스템 구현)
 
 ---
 
@@ -19,13 +19,13 @@
 
 ### 브랜치 정보
 ```bash
-브랜치: claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC
+브랜치: claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC
 상태: Clean, up to date
-푸시: ✅ 완료 (7개 커밋)
+푸시: ✅ 완료
 ```
 
-### 최근 완료 작업 (Phase 5)
-**2025-11-09 완료** - UI 통일성 개선 4단계
+### 최근 완료 작업 (Phase 5~6.1)
+**2025-11-11 완료** - UI 개선 + Claim 페이지 API 연동
 
 1. **Phase 5.1**: ItemCard 아이콘 통일
    - 이모티콘(📍📅) → lucide-react 아이콘 (MapPin, Calendar)

@@ -5,7 +5,9 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
+import ConfirmDialog from './ConfirmDialog';
 
 interface ItemModalProps {
   item: ItemResponse;
@@ -25,7 +27,9 @@ interface ItemModalProps {
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const [imageError, setImageError] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // 날짜 포맷팅 (ISO 8601 → YYYY년 MM월 DD일)
   const formattedDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
@@ -43,7 +47,25 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
   // 분실물 찾기 페이지로 이동
   const handleClaimClick = () => {
     if (isButtonDisabled) return;
+
+    // 로그인 확인
+    if (!isAuthenticated) {
+      setShowConfirmDialog(true);
+      return;
+    }
+
     router.push(`/claim/${item.id}`);
+  };
+
+  // 로그인 확인 다이얼로그 - 확인 버튼
+  const handleConfirmLogin = () => {
+    setShowConfirmDialog(false);
+    router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
+  };
+
+  // 로그인 확인 다이얼로그 - 취소 버튼
+  const handleCancelLogin = () => {
+    setShowConfirmDialog(false);
   };
 
   return (
@@ -150,6 +172,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
           </button>
         </div>
       </div>
+
+      {/* 로그인 확인 다이얼로그 */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        message="로그인이 필요한 기능입니다.&#10;로그인하시겠습니까?"
+        confirmText="로그인"
+        cancelText="취소"
+        onConfirm={handleConfirmLogin}
+        onCancel={handleCancelLogin}
+      />
     </div>
   );
 }
