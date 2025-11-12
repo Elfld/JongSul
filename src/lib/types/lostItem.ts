@@ -26,6 +26,18 @@ export interface SearchParams {
   tags?: number[];   // 태그 ID 배열
 }
 
+// Pickup 코드 응답
+export interface PickupCodeResponse {
+  code: string;
+  expires_at: string; // ISO 8601 datetime
+}
+
+// Claim API 응답
+export interface ClaimResponse {
+  item: ItemResponse;
+  pickup_code: PickupCodeResponse;
+}
+
 /**
  * 상태 인덱스 상수
  * 서버에서 문자열로 오더라도 인덱스로 관리

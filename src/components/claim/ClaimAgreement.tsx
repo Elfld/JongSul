@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface ClaimAgreementProps {
   onAgree: () => void;
   onCancel: () => void;
+  loading?: boolean;
+  error?: string | null;
 }
 
 /**
@@ -15,7 +18,12 @@ interface ClaimAgreementProps {
  * - 동의 체크박스
  * - 동의/취소 버튼
  */
-export default function ClaimAgreement({ onAgree, onCancel }: ClaimAgreementProps) {
+export default function ClaimAgreement({
+  onAgree,
+  onCancel,
+  loading = false,
+  error = null,
+}: ClaimAgreementProps) {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleAgree = () => {
@@ -62,13 +70,14 @@ export default function ClaimAgreement({ onAgree, onCancel }: ClaimAgreementProp
       </div>
 
       {/* 동의 체크박스 */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <input
           type="checkbox"
           id="agree-checkbox"
           checked={isChecked}
           onChange={(e) => setIsChecked(e.target.checked)}
-          className="w-5 h-5 text-sky-500 border-gray-300 rounded focus:ring-sky-500 cursor-pointer"
+          disabled={loading}
+          className="w-5 h-5 text-sky-500 border-gray-300 rounded focus:ring-sky-500 cursor-pointer disabled:opacity-50"
         />
         <label
           htmlFor="agree-checkbox"
@@ -78,23 +87,39 @@ export default function ClaimAgreement({ onAgree, onCancel }: ClaimAgreementProp
         </label>
       </div>
 
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
       {/* 버튼 */}
       <div className="flex gap-4">
         <button
           onClick={onCancel}
-          className="flex-1 py-3 rounded-full font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+          disabled={loading}
+          className="flex-1 py-3 rounded-full font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           취소
         </button>
         <button
           onClick={handleAgree}
-          className={`flex-1 py-3 rounded-full font-semibold transition-colors ${
-            isChecked
+          disabled={loading || !isChecked}
+          className={`flex-1 py-3 rounded-full font-semibold transition-colors flex items-center justify-center ${
+            isChecked && !loading
               ? 'bg-sky-500 text-white hover:bg-sky-600'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          동의
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              처리 중...
+            </>
+          ) : (
+            '동의'
+          )}
         </button>
       </div>
     </div>

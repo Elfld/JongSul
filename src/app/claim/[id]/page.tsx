@@ -7,7 +7,7 @@ import { Package, MapPin, Calendar } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import ClaimAgreement from '@/components/claim/ClaimAgreement';
 import ClaimCodeDisplay from '@/components/claim/ClaimCodeDisplay';
-import { ItemResponse } from '@/lib/types/lostItem';
+import { ItemResponse, ClaimResponse } from '@/lib/types/lostItem';
 
 /**
  * 분실물 찾기 페이지
@@ -29,6 +29,8 @@ export default function ClaimPage() {
   const [expiresAt, setExpiresAt] = useState<string>('');
   const [imageError, setImageError] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   // 실제 API에서 분실물 정보 가져오기
   useEffect(() => {
@@ -57,36 +59,75 @@ export default function ClaimPage() {
     fetchItem();
   }, [itemId]);
 
-  // 6자리 랜덤 코드 생성
+  /* Mock 함수 제거 (백엔드에서 코드 생성)
   const generateClaimCode = () => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     return code;
   };
 
-  // 유효기간 계산 (7일 후)
   const calculateExpiresAt = () => {
     const date = new Date();
     date.setDate(date.getDate() + 7);
     return date.toISOString();
   };
+  */
 
-  // 동의 처리
-  const handleAgree = () => {
-    // 로그인 체크: 로그인하지 않은 경우 로그인 페이지로 리다이렉트
+  // 동의 처리 - 실제 API 호출
+  const handleAgree = async () => {
+    // 로그인 체크
     if (!isAuthenticated) {
       router.push(`/login?redirect=/claim/${itemId}&message=소유권 주장을 위해 로그인이 필요합니다.`);
       return;
     }
 
-    const code = generateClaimCode();
-    const expires = calculateExpiresAt();
+    setLoading(true);
+    setClaimError(null);
 
-    setClaimCode(code);
-    setExpiresAt(expires);
-    setAgreed(true);
+    try {
+      // 토큰 가져오기
+      const token = localStorage.getItem('access_token');
 
-    // TODO: API 연동 시 서버에 소유권 주장 등록
-    // await claimItem(itemId, code, expires);
+      if (!token) {
+        router.push(`/login?redirect=/claim/${itemId}&message=로그인이 필요합니다.`);
+        return;
+      }
+
+      // API 호출
+      const response = await fetch(`/api/items/${itemId}/claim`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        // 401: 토큰 만료 → 로그인 페이지로
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          router.push(`/login?redirect=/claim/${itemId}&message=로그인이 필요합니다.`);
+          return;
+        }
+
+        // 기타 에러 표시
+        throw new Error(errorData.error || '소유권 주장에 실패했습니다.');
+      }
+
+      const data: ClaimResponse = await response.json();
+
+      // 성공: 코드 표시
+      setClaimCode(data.pickup_code.code);
+      setExpiresAt(data.pickup_code.expires_at);
+      setAgreed(true);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '소유권 주장에 실패했습니다.';
+      setClaimError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 취소 처리
@@ -188,7 +229,12 @@ export default function ClaimPage() {
 
       {/* 서약서 또는 코드 표시 */}
       {!agreed ? (
-        <ClaimAgreement onAgree={handleAgree} onCancel={handleCancel} />
+        <ClaimAgreement
+          onAgree={handleAgree}
+          onCancel={handleCancel}
+          loading={loading}
+          error={claimError}
+        />
       ) : (
         claimCode && <ClaimCodeDisplay code={claimCode} expiresAt={expiresAt} />
       )}
