@@ -83,11 +83,14 @@ export default function ClaimPage() {
     setLoading(true);
     setClaimError(null);
 
+    console.log('[Claim] API 호출 시작:', { itemId });
+
     try {
       // 토큰 가져오기
       const token = localStorage.getItem('access_token');
 
       if (!token) {
+        console.warn('[Claim] 토큰 없음 → 로그인 페이지 이동');
         router.push(`/login?redirect=/claim/${itemId}&message=로그인이 필요합니다.`);
         return;
       }
@@ -104,6 +107,14 @@ export default function ClaimPage() {
       if (!response.ok) {
         const errorData = await response.json();
 
+        // 에러 상세 로깅
+        console.error('[Claim] API 에러:', {
+          status: response.status,
+          statusText: response.statusText,
+          itemId,
+          errorData,
+        });
+
         // 401: 토큰 만료 → 로그인 페이지로
         if (response.status === 401) {
           localStorage.removeItem('access_token');
@@ -111,11 +122,23 @@ export default function ClaimPage() {
           return;
         }
 
+        // 400: 상세 에러 메시지 표시
+        if (response.status === 400) {
+          const detailMessage = errorData.detail || errorData.error || '잘못된 요청입니다.';
+          throw new Error(detailMessage);
+        }
+
         // 기타 에러 표시
-        throw new Error(errorData.error || '소유권 주장에 실패했습니다.');
+        throw new Error(errorData.error || errorData.detail || '소유권 주장에 실패했습니다.');
       }
 
       const data: ClaimResponse = await response.json();
+
+      console.log('[Claim] API 성공:', {
+        itemId,
+        hasPickupCode: !!data.pickup_code,
+        expiresAt: data.pickup_code.expires_at,
+      });
 
       // 성공: 코드 표시
       setClaimCode(data.pickup_code.code);
@@ -123,6 +146,7 @@ export default function ClaimPage() {
       setAgreed(true);
 
     } catch (err) {
+      console.error('[Claim] 처리 실패:', err);
       const errorMessage = err instanceof Error ? err.message : '소유권 주장에 실패했습니다.';
       setClaimError(errorMessage);
     } finally {

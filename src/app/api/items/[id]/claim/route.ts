@@ -31,9 +31,12 @@ export async function POST(
     );
   }
 
+  const externalUrl = `${apiBaseUrl}/main/items/${itemId}/claim`;
+  console.log('[Claim 프록시] 외부 API 호출:', externalUrl);
+
   try {
     // 외부 API 호출
-    const response = await fetch(`${apiBaseUrl}/main/items/${itemId}/claim`, {
+    const response = await fetch(externalUrl, {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
@@ -43,8 +46,37 @@ export async function POST(
 
     const data = await response.json();
 
+    // 성공 로깅
+    if (response.ok) {
+      console.log('[Claim 프록시] 성공:', {
+        status: response.status,
+        itemId,
+        hasPickupCode: !!data.pickup_code,
+      });
+    }
+
     // 에러 처리
     if (!response.ok) {
+      // 에러 로깅 (모든 에러)
+      console.error('[Claim 프록시] 외부 API 에러:', {
+        status: response.status,
+        statusText: response.statusText,
+        itemId,
+        error: data,
+      });
+
+      // 400: Bad Request (잘못된 요청)
+      if (response.status === 400) {
+        return NextResponse.json(
+          {
+            error: '잘못된 요청입니다.',
+            detail: data.detail || data.error || '요청 데이터를 확인해주세요.',
+            raw: data, // 디버깅용
+          },
+          { status: 400 }
+        );
+      }
+
       // 401: 토큰 만료/유효하지 않음
       if (response.status === 401) {
         return NextResponse.json(
@@ -79,7 +111,6 @@ export async function POST(
 
       // 500+: 서버 오류
       if (response.status >= 500) {
-        console.error('Claim API server error:', response.status, data);
         return NextResponse.json(
           { error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
           { status: 500 }
@@ -88,7 +119,11 @@ export async function POST(
 
       // 기타 오류
       return NextResponse.json(
-        { error: data.error || '소유권 주장에 실패했습니다.' },
+        {
+          error: data.error || data.detail || '소유권 주장에 실패했습니다.',
+          detail: data.detail,
+          raw: data, // 디버깅용
+        },
         { status: response.status }
       );
     }
@@ -97,10 +132,13 @@ export async function POST(
     return NextResponse.json(data);
 
   } catch (error) {
-    // 네트워크 오류
-    if (!(error instanceof Error)) {
-      console.error('Claim API network error:', error);
-    }
+    // 네트워크 오류 로깅
+    console.error('[Claim 프록시] 네트워크 에러:', {
+      itemId,
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return NextResponse.json(
       { error: '네트워크 오류가 발생했습니다.' },
       { status: 500 }

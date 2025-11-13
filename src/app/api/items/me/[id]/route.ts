@@ -32,9 +32,12 @@ export async function GET(
     );
   }
 
+  const externalUrl = `${apiBaseUrl}/main/items/me/${itemId}`;
+  console.log('[MyPage 상세] 외부 API 호출:', externalUrl);
+
   try {
     // 외부 API 호출
-    const response = await fetch(`${apiBaseUrl}/main/items/me/${itemId}`, {
+    const response = await fetch(externalUrl, {
       method: 'GET',
       headers: {
         'Authorization': authHeader,
@@ -44,8 +47,25 @@ export async function GET(
 
     const data = await response.json();
 
+    // 성공 로깅
+    if (response.ok) {
+      console.log('[MyPage 상세] 성공:', {
+        status: response.status,
+        itemId,
+        hasPickupCode: !!data.pickup_code,
+      });
+    }
+
     // 에러 처리
     if (!response.ok) {
+      // 에러 로깅
+      console.error('[MyPage 상세] 외부 API 에러:', {
+        status: response.status,
+        statusText: response.statusText,
+        itemId,
+        error: data,
+      });
+
       // 401: 토큰 만료/유효하지 않음
       if (response.status === 401) {
         return NextResponse.json(
@@ -64,7 +84,6 @@ export async function GET(
 
       // 500+: 서버 오류
       if (response.status >= 500) {
-        console.error('MyPage Detail API server error:', response.status, data);
         return NextResponse.json(
           { error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
           { status: 500 }
@@ -73,7 +92,7 @@ export async function GET(
 
       // 기타 오류
       return NextResponse.json(
-        { error: data.error || '예약 상세 정보를 불러오는데 실패했습니다.' },
+        { error: data.error || data.detail || '예약 상세 정보를 불러오는데 실패했습니다.' },
         { status: response.status }
       );
     }
@@ -82,10 +101,13 @@ export async function GET(
     return NextResponse.json(data);
 
   } catch (error) {
-    // 네트워크 오류
-    if (!(error instanceof Error)) {
-      console.error('MyPage Detail API network error:', error);
-    }
+    // 네트워크 오류 로깅
+    console.error('[MyPage 상세] 네트워크 에러:', {
+      itemId,
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     return NextResponse.json(
       { error: '네트워크 오류가 발생했습니다.' },
       { status: 500 }
