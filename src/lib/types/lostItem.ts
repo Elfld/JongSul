@@ -38,6 +38,12 @@ export interface ClaimResponse {
   pickup_code: PickupCodeResponse;
 }
 
+// MyPage 관련 타입
+export interface MyItemDetailResponse {
+  item: ItemResponse;
+  pickup_code: PickupCodeResponse;
+}
+
 /**
  * 상태 인덱스 상수
  * 서버에서 문자열로 오더라도 인덱스로 관리

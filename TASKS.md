@@ -1,8 +1,8 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-12
+> 📅 최종 업데이트: 2025-11-13
 > 🔄 현재 브랜치: `claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC`
-> ✅ 최근 완료: Phase 7.2 - Claim API 연동 (커밋: 9089e3d)
+> ✅ 최근 완료: Phase 7.3 - MyPage API 연동
 
 ---
 
@@ -176,23 +176,37 @@
   - [x] 로딩 중 버튼 비활성화
   - [x] 에러 메시지 표시
 
-#### 7.3 마이페이지 API 연동
-**상태**: ❌ 다음 작업
+#### 7.3 마이페이지 API 연동 (완료)
+**상태**: ✅ 완료
 **위치**: `src/app/mypage/page.tsx`
 
-- [ ] **API 엔드포인트**
-  - [ ] GET /api/items/me - 내 예약 목록 프록시
-  - [ ] GET /api/items/me/[id] - 내 예약 상세 프록시 (Optional)
+- [x] **API 엔드포인트**
+  - [x] GET /api/items/me - 내 예약 목록 프록시
+  - [x] GET /api/items/me/[id] - 내 예약 상세 프록시
 
-- [ ] **mypage 페이지 수정**
-  - [ ] Mock 데이터 제거
-  - [ ] useEffect에서 /api/items/me 호출
-  - [ ] 로딩 상태 처리
-  - [ ] 빈 목록 처리
+- [x] **타입 정의**
+  - [x] MyItemDetailResponse 타입 추가
+  - [x] ClaimedItem 타입을 API 응답 구조에 맞게 수정
 
-- [ ] **예약 취소 기능**
-  - [ ] DELETE API 미구현 - 주석 처리
-  - [ ] 백엔드 확인 후 구현
+- [x] **mypage 페이지 수정**
+  - [x] Mock 데이터 제거
+  - [x] useEffect에서 /api/items/me 호출
+  - [x] 로딩 상태 처리
+  - [x] 빈 목록 처리
+  - [x] 2열 그리드 레이아웃 적용
+
+- [x] **카드 클릭 시 상세 API 호출**
+  - [x] handleItemClick에서 /api/items/me/[id] 호출
+  - [x] pickup_code는 상세 API에서만 제공
+
+- [x] **MyPageItemDetailModal 수정**
+  - [x] "예약 유효기간" → "코드 유효기간" 라벨 변경
+  - [x] detailData, detailLoading props 추가
+  - [x] 로딩 상태 처리
+
+- [x] **예약 취소 기능**
+  - [x] DELETE API 미구현 - 주석 처리
+  - [x] 백엔드 확인 후 구현 예정
 
 #### 7.4 알림 설정 API 연동 (마이페이지)
 **상태**: ❌ 미구현 (API 명세 확인 필요)
@@ -230,12 +244,12 @@
 | API | 상태 | 파일 |
 |-----|------|------|
 | POST /items/{id}/claim | ✅ | `/api/items/[id]/claim/route.ts` |
+| GET /items/me | ✅ | `/api/items/me/route.ts` |
+| GET /items/me/{id} | ✅ | `/api/items/me/[id]/route.ts` |
 
 ### ❌ 미구현 (Protected API - 인증 필요)
 | API | 우선순위 | 비고 |
 |-----|----------|------|
-| GET /items/me | 🔥 높음 | Phase 7.3 예정 |
-| GET /items/me/{id} | 🟡 중간 | Phase 7.3 Optional |
 | DELETE /items/{id}/claim | 🔴 보류 | OpenAPI 명세 없음, 백엔드 확인 필요 |
 
 ---
