@@ -53,16 +53,23 @@ export interface MyItemDetailResponse {
  * - "찾음" → 수령완료 (회색 배지)
  */
 export function getStatusInfo(status: string) {
+  // 디버깅: 서버에서 받은 status 값 확인
+  console.log('[getStatusInfo] 입력 status:', JSON.stringify(status), 'length:', status.length);
+
   if (status === '보관') {
+    console.log('→ 매칭: 보관 → 예약가능');
     return { label: '예약가능', color: 'sky' };
   }
   if (status === '예약') {
+    console.log('→ 매칭: 예약 → 예약중');
     return { label: '예약중', color: 'pink' };
   }
   if (status === '찾음') {
+    console.log('→ 매칭: 찾음 → 수령완료');
     return { label: '수령완료', color: 'gray' };
   }
 
+  console.log('→ 기본값: 예약가능');
   // 기본값 (보관 = 예약가능)
   return { label: '예약가능', color: 'sky' };
 }
