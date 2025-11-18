@@ -162,12 +162,16 @@ export default function MyPage() {
     }
 
     try {
-      // DELETE API 호출
-      const response = await fetch(`/api/items/${selectedItem.id}/claim`, {
-        method: 'DELETE',
+      // POST /api/items/me/{id}/cancel API 호출
+      const response = await fetch(`/api/items/me/${selectedItem.id}/cancel`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          cancel_reason: reason,
+        }),
       });
 
       if (!response.ok) {
