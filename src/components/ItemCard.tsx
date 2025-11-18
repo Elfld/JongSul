@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Package, MapPin, Calendar } from 'lucide-react';
-import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
+import { ItemResponse, getStatusInfo } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
   item: ItemResponse;
@@ -32,7 +32,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
 
   // 상태 정보 가져오기
   const statusInfo = getStatusInfo(item.status);
-  const showStatusChip = statusInfo.index !== STATUS_INDEX.LOST;
+  const showStatusChip = statusInfo.label !== '예약가능';
 
   return (
     <div
@@ -69,7 +69,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           {showStatusChip && (
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${
-                statusInfo.index === STATUS_INDEX.STORED
+                statusInfo.label === '예약중'
                   ? 'bg-pink-100 text-pink-600'
                   : 'bg-gray-100 text-gray-600'
               }`}

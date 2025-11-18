@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { X, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle, Package } from 'lucide-react';
+import { X, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle, Package, Loader2 } from 'lucide-react';
 import { ClaimedItem } from './ClaimedItemCard';
+import { MyItemDetailResponse, getStatusInfo } from '@/lib/types/lostItem';
 
 interface MyPageItemDetailModalProps {
   item: ClaimedItem;
+  detailData: MyItemDetailResponse | null;
+  detailLoading: boolean;
   onClose: () => void;
   onCancelReservation?: () => void;
 }
@@ -16,11 +19,13 @@ interface MyPageItemDetailModalProps {
  *
  * 기능:
  * - 수령 예정/완료 분실물 상세 정보 표시
- * - 수령 코드 및 유효기간 표시
- * - 예약 취소 기능 (pending 상태만)
+ * - 수령 코드 및 코드 유효기간 표시 (detailData에서 가져옴)
+ * - 상세 정보 로딩 처리
  */
 export default function MyPageItemDetailModal({
   item,
+  detailData,
+  detailLoading,
   onClose,
   onCancelReservation,
 }: MyPageItemDetailModalProps) {
@@ -33,19 +38,27 @@ export default function MyPageItemDetailModal({
     day: 'numeric',
   });
 
-  const formattedExpires = new Date(item.expires_at).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  // 상태 정보
+  const statusInfo = getStatusInfo(item.status);
+  const isPending = statusInfo.label === '예약중';
 
-  const isPending = item.status === 'pending';
+  // 코드 유효기간 포맷팅 (detailData가 있을 때만)
+  const formattedExpires = detailData
+    ? new Date(detailData.pickup_code.expires_at).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : '';
 
+  // TODO: DELETE API 구현 후 활성화
+  /*
   const handleCancelClick = () => {
     if (onCancelReservation) {
       onCancelReservation();
     }
   };
+  */
 
   return (
     <div
@@ -61,7 +74,7 @@ export default function MyPageItemDetailModal({
           {item.photo_url && !imageError ? (
             <Image
               src={item.photo_url}
-              alt={item.tags[0] || '분실물'}
+              alt={item.tags[0]?.name || '분실물'}
               fill
               className="object-contain rounded-xl"
               onError={() => setImageError(true)}
@@ -90,12 +103,12 @@ export default function MyPageItemDetailModal({
             <div>
               <h3 className="text-sm font-semibold text-gray-500 mb-2">카테고리</h3>
               <div className="flex flex-wrap gap-2">
-                {item.tags.map((tag, index) => (
+                {item.tags.map((tag) => (
                   <span
-                    key={index}
+                    key={tag.id}
                     className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm font-medium border border-sky-200"
                   >
-                    {tag}
+                    {tag.name}
                   </span>
                 ))}
               </div>
@@ -133,28 +146,39 @@ export default function MyPageItemDetailModal({
               <h3 className="text-sm font-semibold text-gray-500 mb-2">분실함 위치</h3>
               <div className="flex items-center gap-2 text-lg text-gray-800">
                 <MapPin className="w-5 h-5 text-gray-500" />
-                <span>{item.location}</span>
+                <span>{item.location || '위치 정보 없음'}</span>
               </div>
             </div>
 
-            {/* 수령 코드 (pending만) */}
+            {/* 수령 코드 (pending만, detailData 로딩 후 표시) */}
             {isPending && (
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 mb-2">수령 코드</h3>
-                <div className="flex items-center gap-2 text-xl font-bold text-sky-600">
-                  <Key className="w-5 h-5" />
-                  <span>{item.code}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  분실함에서 이 코드를 사용하여 수령하세요
-                </p>
+                {detailLoading ? (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>코드 로딩 중...</span>
+                  </div>
+                ) : detailData ? (
+                  <>
+                    <div className="flex items-center gap-2 text-xl font-bold text-sky-600">
+                      <Key className="w-5 h-5" />
+                      <span>{detailData.pickup_code.code}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      분실함에서 이 코드를 사용하여 수령하세요
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-red-500">코드를 불러올 수 없습니다</p>
+                )}
               </div>
             )}
 
-            {/* 유효기간 (pending만) */}
-            {isPending && (
+            {/* 코드 유효기간 (pending만, detailData 로딩 후 표시) */}
+            {isPending && detailData && !detailLoading && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 mb-2">예약 유효기간</h3>
+                <h3 className="text-sm font-semibold text-gray-500 mb-2">코드 유효기간</h3>
                 <div className="flex items-center gap-2 text-lg text-gray-800">
                   <Clock className="w-5 h-5 text-gray-500" />
                   <span>{formattedExpires}까지</span>
@@ -163,7 +187,7 @@ export default function MyPageItemDetailModal({
             )}
           </div>
 
-          {/* 하단 버튼 */}
+          {/* TODO: 예약 취소 기능 - DELETE API 구현 후 활성화
           {isPending && (
             <button
               onClick={handleCancelClick}
@@ -172,6 +196,7 @@ export default function MyPageItemDetailModal({
               예약 취소
             </button>
           )}
+          */}
         </div>
       </div>
     </div>

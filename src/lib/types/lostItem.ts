@@ -26,47 +26,52 @@ export interface SearchParams {
   tags?: number[];   // 태그 ID 배열
 }
 
-/**
- * 상태 인덱스 상수
- * 서버에서 문자열로 오더라도 인덱스로 관리
- */
-export const STATUS_INDEX = {
-  LOST: 0,      // 분실
-  STORED: 1,    // 보관 (수령 예약된 물품)
-  FOUND: 2,     // 찾음 (가져간 물품)
-} as const;
+// Pickup 코드 응답
+export interface PickupCodeResponse {
+  code: string;
+  expires_at: string; // ISO 8601 datetime
+}
 
-/**
- * 상태 문자열을 인덱스로 변환
- * 서버에서 상태명이 변경되어도 이 함수만 수정하면 됨
- */
-export function getStatusIndex(status: string): number {
-  const statusUpper = status.toUpperCase();
+// Claim API 응답
+export interface ClaimResponse {
+  item: ItemResponse;
+  pickup_code: PickupCodeResponse;
+}
 
-  // 서버 상태명 매핑 (필요시 여기만 수정)
-  if (statusUpper.includes('LOST') || statusUpper === '분실') return STATUS_INDEX.LOST;
-  if (statusUpper.includes('STORED') || statusUpper === '보관') return STATUS_INDEX.STORED;
-  if (statusUpper.includes('FOUND') || statusUpper === '찾음') return STATUS_INDEX.FOUND;
-
-  return STATUS_INDEX.LOST; // 기본값
+// MyPage 관련 타입
+export interface MyItemDetailResponse {
+  item: ItemResponse;
+  pickup_code: PickupCodeResponse;
 }
 
 /**
  * 상태 정보 반환
+ *
+ * 서버에서 한글로 넘어오는 상태를 직접 매핑:
+ * - "보관" → 예약 가능 (카드에 배지 표기 안함)
+ * - "예약" → 예약중 (분홍색 배지)
+ * - "찾음" → 수령완료 (회색 배지)
  */
 export function getStatusInfo(status: string) {
-  const index = getStatusIndex(status);
+  // 디버깅: 서버에서 받은 status 값 확인
+  console.log('[getStatusInfo] 입력 status:', JSON.stringify(status), 'length:', status.length);
 
-  switch (index) {
-    case STATUS_INDEX.LOST:
-      return { index, label: '분실', color: 'sky' };
-    case STATUS_INDEX.STORED:
-      return { index, label: '예약중', color: 'pink' };
-    case STATUS_INDEX.FOUND:
-      return { index, label: '수령완료', color: 'gray' };
-    default:
-      return { index, label: '분실', color: 'sky' };
+  if (status === '보관') {
+    console.log('→ 매칭: 보관 → 예약가능');
+    return { label: '예약가능', color: 'sky' };
   }
+  if (status === '예약') {
+    console.log('→ 매칭: 예약 → 예약중');
+    return { label: '예약중', color: 'pink' };
+  }
+  if (status === '찾음') {
+    console.log('→ 매칭: 찾음 → 수령완료');
+    return { label: '수령완료', color: 'gray' };
+  }
+
+  console.log('→ 기본값: 예약가능');
+  // 기본값 (보관 = 예약가능)
+  return { label: '예약가능', color: 'sky' };
 }
 
 /**

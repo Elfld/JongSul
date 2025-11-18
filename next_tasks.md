@@ -1,199 +1,173 @@
-# 🚀 Next Tasks - 로그인/회원가입 구현
+# 🚀 Next Tasks - API 연동 및 UX 개선
 
-> **현재 작업**: Phase 7.1 - 인증 시스템 구현
-> **목표**: 로그인/회원가입 기능 완성 후 Protected API 연동 준비
-
----
-
-## 📋 작업 순서
-
-### Step 1: 인증 API 엔드포인트 구현
-
-#### 1.1 회원가입 API 프록시 (`/api/users/register`)
-**파일**: `src/app/api/users/register/route.ts` (새 파일)
-
-**구현 내용**:
-```typescript
-POST /api/users/register
-Body: { email, password, name, phone }
-Response: { access_token, user: { id, email, name, phone } }
-```
-
-**작업**:
-- [ ] `src/app/api/users/register/route.ts` 생성
-- [ ] POST 핸들러 구현
-- [ ] API_BASE_URL + `/users/register`로 프록시
-- [ ] 에러 처리 (409 중복 이메일, 400 유효성 검증 실패)
-- [ ] 성공 시 access_token + user 정보 반환
-
-#### 1.2 로그인 API 프록시 (`/api/users/login`)
-**파일**: `src/app/api/users/login/route.ts` (새 파일)
-
-**구현 내용**:
-```typescript
-POST /api/users/login
-Body: { email, password }
-Response: { access_token, user: { id, email, name, phone } }
-```
-
-**작업**:
-- [ ] `src/app/api/users/login/route.ts` 생성
-- [ ] POST 핸들러 구현
-- [ ] API_BASE_URL + `/users/login`으로 프록시
-- [ ] 에러 처리 (401 인증 실패, 404 사용자 없음)
-- [ ] 성공 시 access_token + user 정보 반환
+> **현재 상태**: Phase 7.3 완료 (MyPage API 연동 완료)
+> **다음 작업**: Phase 7.4 - 알림 설정 API 연동 또는 Phase 7.5 - 에러 처리 강화
+> **브랜치**: `claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC`
+> **최근 커밋**: `2488940` - API 에러 처리 및 로깅 강화
 
 ---
 
-### Step 2: 인증 상태 관리 구현
+## ✅ 완료된 작업
 
-#### 2.1 AuthContext 생성
-**파일**: `src/lib/contexts/AuthContext.tsx` (새 파일)
+### Phase 7.1 - 인증 시스템 구현 (완료)
+- ✅ 회원가입 API 프록시 (`/api/users/register`)
+- ✅ 로그인 API 프록시 (`/api/users/login`)
+- ✅ AuthContext 전역 상태 관리
+- ✅ 로그인/회원가입 페이지 UI
+- ✅ 인증 가드 (마이페이지, 클레임)
+- ✅ ConfirmDialog 재사용 컴포넌트
+- ✅ 로그인 복귀 기능
 
-**구현 내용**:
-- [ ] User 타입 정의 (id, email, name, phone)
-- [ ] AuthContextType 인터페이스 정의
-  - user: User | null
-  - token: string | null
-  - isAuthenticated: boolean
-  - login(email, password): Promise<void>
-  - register(email, password, name, phone): Promise<void>
-  - logout(): void
-  - isLoading: boolean
-- [ ] AuthProvider 컴포넌트 구현
-  - useState로 user, token, isLoading 관리
-  - useEffect로 localStorage에서 토큰 로드
-  - login 함수: /api/users/login 호출 → token/user 저장
-  - register 함수: /api/users/register 호출 → token/user 저장
-  - logout 함수: state 초기화 + localStorage 삭제
-- [ ] useAuth 커스텀 훅 export
+### Phase 7.2 - Claim API 연동 (완료)
+- ✅ PickupCodeResponse, ClaimResponse 타입 추가
+- ✅ Claim API 프록시 (`/api/items/[id]/claim`)
+- ✅ Claim 페이지 실제 API 호출
+- ✅ ClaimAgreement 컴포넌트 로딩/에러 상태
+- ✅ Mock 코드 생성 제거
 
-#### 2.2 RootLayout에 AuthProvider 추가
-**파일**: `src/app/layout.tsx`
+### Phase 7.3 - MyPage API 연동 (완료) - 커밋 `6a2ef44`
+- ✅ MyItemDetailResponse 타입 추가
+- ✅ ClaimedItem 타입을 API 응답 구조에 맞게 수정
+  - `tags: TagResponse[]` (기존: `string[]`)
+  - `code`, `expires_at` 필드 제거 (상세 API에서만 제공)
+  - `status: string` (기존: 'pending' | 'completed')
+- ✅ MyPage API 프록시 생성
+  - GET `/api/items/me` - 내 예약 목록
+  - GET `/api/items/me/[id]` - 내 예약 상세 (pickup_code 포함)
+- ✅ Mock 데이터 제거 및 실제 API 호출
+- ✅ 로딩/에러 상태 처리
+- ✅ 2열 그리드 레이아웃 적용
+- ✅ 카드 클릭 시 상세 API 호출하여 pickup_code 표시
+- ✅ "예약 유효기간" → "코드 유효기간" 라벨 변경
+- ✅ 예약 취소 기능 주석 처리 (DELETE API 미구현)
 
-**작업**:
-- [ ] AuthProvider import
-- [ ] children을 AuthProvider로 감싸기
-- [ ] suppressHydrationWarning 유지
-
----
-
-### Step 3: 로그인 페이지 UI 구현
-
-**파일**: `src/app/login/page.tsx` (새 파일)
-
-**구현 내용**:
-- [ ] 'use client' 선언
-- [ ] useAuth() 훅 사용
-- [ ] 이메일/비밀번호 입력 폼
-- [ ] 로그인 버튼 (handleLogin 함수 연결)
-- [ ] 에러 메시지 표시 (useState로 관리)
-- [ ] 로딩 상태 표시
-- [ ] 회원가입 링크 (→ /register)
-- [ ] 로그인 성공 시 router.push('/') 또는 이전 페이지
-- [ ] 이미 로그인된 상태면 자동으로 메인 페이지 이동
-
-**디자인**:
-- 중앙 정렬 레이아웃
-- Tailwind CSS 사용 (기존 스타일 통일)
-- 간결한 폼 (이메일, 비밀번호, 버튼)
+### API 에러 처리 및 로깅 강화 (완료) - 커밋 `2488940`
+- ✅ Claim API에 400 에러 처리 추가
+- ✅ 모든 API 프록시에 상세 로깅 추가
+  - 요청 URL 로깅
+  - 성공 시 주요 정보 로깅
+  - 에러 시 status, statusText, 상세 에러 데이터 로깅
+- ✅ 클라이언트 Claim 페이지 로깅 강화
+- ✅ 디버깅 편의성 향상 (raw 데이터 포함)
 
 ---
 
-### Step 4: 회원가입 페이지 UI 구현
+## 📋 다음 작업
 
-**파일**: `src/app/register/page.tsx` (새 파일)
+### 🔴 Priority 1: Phase 7.4 - 알림 설정 API 연동
+**상태**: ⏸️ 보류 (백엔드 API 명세 확인 필요)
 
-**구현 내용**:
-- [ ] 'use client' 선언
-- [ ] useAuth() 훅 사용
-- [ ] 이메일/비밀번호/이름/연락처 입력 폼
-- [ ] 회원가입 버튼 (handleRegister 함수 연결)
-- [ ] 에러 메시지 표시
-- [ ] 로딩 상태 표시
-- [ ] 로그인 링크 (→ /login)
-- [ ] 유효성 검증 (클라이언트 사이드)
-  - 이메일 형식 확인
-  - 비밀번호 길이 확인 (최소 6자 이상)
-  - 연락처 형식 확인
-- [ ] 회원가입 성공 시 자동 로그인 → 메인 페이지 이동
-
-**디자인**:
-- 로그인 페이지와 통일된 디자인
-- 중앙 정렬 레이아웃
-- 입력 필드 4개 (이메일, 비밀번호, 이름, 연락처)
+**확인 필요 사항**:
+- 관심 태그 저장 API 엔드포인트
+- 알림 설정 조회 API 엔드포인트
+- OpenAPI 명세에 없음 → 백엔드 팀 문의 필요
 
 ---
 
-### Step 5: Header 컴포넌트에 로그인/로그아웃 버튼 추가
+### 🟡 Priority 2: Phase 7.5 - 에러 처리 및 피드백 강화
+**예상 시간**: 2시간
+**목표**: 사용자 피드백 개선 (Toast 시스템, 에러 처리 일관성)
 
-**파일**: `src/components/Header.tsx`
+#### Option A: Toast 시스템 도입
+- sonner 또는 react-hot-toast 설치
+- alert() 제거하고 Toast로 전환
+- 성공/에러 Toast 일관성 확보
 
-**작업**:
-- [ ] useAuth() 훅 사용
-- [ ] isAuthenticated 상태에 따라 버튼 표시
-  - 로그인 전: "로그인" 버튼 (→ /login)
-  - 로그인 후: "로그아웃" 버튼 (logout 함수 호출)
-- [ ] 마이페이지 버튼 옆에 배치
-- [ ] lucide-react 아이콘 사용 (LogIn, LogOut)
-
----
-
-### Step 6: Protected Route 처리 (추후 고려)
-
-**현재는 Skip 가능**:
-- 마이페이지는 로그인 없이도 접근 가능 (빈 목록 표시)
-- 서약서 페이지에서 claim API 호출 시 401 에러 처리로 충분
-- 추후 필요 시 middleware.ts 또는 HOC 구현
+#### Option B: 현재 상태 유지
+- 기존 alert() 및 state 기반 에러 처리 유지
+- 필요 시 커스텀 Toast 컴포넌트 제작
 
 ---
 
-## 🎯 완료 조건
+### 🔴 Priority 3: 백엔드 확인 필요
 
-### 기능 테스트
-- [ ] 회원가입 → 자동 로그인 → 메인 페이지 이동
-- [ ] 로그아웃 → 로그인 → 메인 페이지 복귀
-- [ ] localStorage에 access_token 저장 확인
-- [ ] 페이지 새로고침 후에도 로그인 상태 유지
-- [ ] 에러 케이스 테스트 (잘못된 비밀번호, 중복 이메일 등)
+| 항목 | 상태 | 비고 |
+|-----|------|------|
+| `/items/2/claim` 400 에러 | 🔴 확인 필요 | 서버 측 원인 파악 필요 |
+| DELETE `/items/{id}/claim` | 🔴 명세 없음 | 예약 취소 API 필요 |
+| 알림 설정 API | 🔴 명세 없음 | Phase 7.4 블로킹 |
 
-### 빌드 및 품질
-- [ ] `npm run build` 성공
-- [ ] 타입 에러 0개
-- [ ] ESLint 경고 0개
-- [ ] 브라우저에서 동작 확인
+---
+
+## 📊 API 연동 현황
+
+### ✅ 구현 완료 (Public API)
+| API | 파일 | 로깅 |
+|-----|------|------|
+| GET /health_check | `/api/health/route.ts` | ❌ |
+| GET /items/search | `/api/items/search/route.ts` | ❌ |
+| GET /items/{id} | `/api/items/[id]/route.ts` | ❌ |
+| GET /tags | `/api/tags/route.ts` | ❌ |
+
+### ✅ 구현 완료 (인증 API)
+| API | 파일 | 로깅 |
+|-----|------|------|
+| POST /users/register | `/api/users/register/route.ts` | ✅ |
+| POST /users/login | `/api/users/login/route.ts` | ✅ |
+
+### ✅ 구현 완료 (Protected API)
+| API | 파일 | 로깅 |
+|-----|------|------|
+| POST /items/{id}/claim | `/api/items/[id]/claim/route.ts` | ✅ |
+| GET /items/me | `/api/items/me/route.ts` | ✅ |
+| GET /items/me/{id} | `/api/items/me/[id]/route.ts` | ✅ |
+
+### ❌ 미구현
+| API | 우선순위 | 비고 |
+|-----|----------|------|
+| DELETE /items/{id}/claim | 🔴 보류 | 명세 없음, 백엔드 확인 필요 |
+| 알림 설정 API | 🟡 중간 | 명세 없음, Phase 7.4 |
+
+---
+
+## 🧪 테스트 체크리스트
+
+### Phase 7.3 완료 후 테스트
+- [x] MyPage 목록 API 호출 성공
+- [x] 2열 그리드 레이아웃 정상 표시
+- [x] 카드 클릭 시 상세 정보 로딩
+- [x] pickup_code 모달에서만 표시
+- [x] 401 에러 시 로그인 페이지 이동
+- [x] 로딩 상태 스피너 표시
+- [x] 빈 목록 메시지 표시
 
 ---
 
 ## 📝 커밋 전략
 
-각 Step 완료 시마다 개별 커밋:
+### 문서 업데이트 시
+```
+docs: Phase 7.3 완료 및 다음 작업 계획 문서화
 
-1. `feat: Phase 7.1.1 - 인증 API 프록시 구현 (register, login)`
-2. `feat: Phase 7.1.2 - AuthContext 및 전역 상태 관리 구현`
-3. `feat: Phase 7.1.3 - 로그인 페이지 UI 구현`
-4. `feat: Phase 7.1.4 - 회원가입 페이지 UI 구현`
-5. `feat: Phase 7.1.5 - Header에 로그인/로그아웃 버튼 추가`
+- next_tasks.md 업데이트
+- TASKS.md 최신화
+- Phase 7.3 완료 내역 정리
+- Phase 7.4, 7.5 계획 추가
+- 백엔드 확인 필요 항목 정리
+```
 
 ---
 
-## 🔗 참고 사항
+## 🔜 향후 계획
 
-### OpenAPI 명세
-- POST /users/register
-  - Request: `{ email, password, name, phone }`
-  - Response: `{ access_token, user }`
-- POST /users/login
-  - Request: `{ email, password }`
-  - Response: `{ access_token, user }`
+### Phase 8: 성능 최적화
+- React Query 도입 (캐싱, 재시도)
+- 이미지 최적화
+- 코드 스플리팅
 
-### 기술 스택
-- Context API (전역 상태 관리)
-- localStorage (토큰 저장)
-- Next.js App Router
-- Tailwind CSS
+### Phase 9: 추가 기능
+- 알림 설정 API 연동 (백엔드 준비 시)
+- 예약 취소 기능 (DELETE API 준비 시)
+- 분실물 등록 기능 (관리자)
 
-### 다음 Phase
-Phase 7.1 완료 후:
-- Phase 7.2: Claim API 연동 (POST /items/{id}/claim)
-- Phase 7.3: MyPage API 연동 (GET /items/me)
+### Phase 10: 배포 준비
+- 환경 변수 설정
+- 빌드 최적화
+- Vercel 배포
+
+---
+
+## 📚 참고 링크
+
+- [Next.js 15 문서](https://nextjs.org/docs)
+- [OpenAPI 명세](./docs/openapi.yaml)

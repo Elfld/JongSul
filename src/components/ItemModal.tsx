@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { ItemResponse, getStatusInfo, STATUS_INDEX } from '@/lib/types/lostItem';
+import { ItemResponse, getStatusInfo } from '@/lib/types/lostItem';
 import ConfirmDialog from './ConfirmDialog';
 
 interface ItemModalProps {
@@ -40,8 +40,8 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
   // 상태 정보 가져오기
   const statusInfo = getStatusInfo(item.status);
-  const isReserved = statusInfo.index === STATUS_INDEX.STORED;
-  const isPickedUp = statusInfo.index === STATUS_INDEX.FOUND;
+  const isReserved = statusInfo.label === '예약중';
+  const isPickedUp = statusInfo.label === '수령완료';
   const isButtonDisabled = isReserved || isPickedUp;
 
   // 분실물 찾기 페이지로 이동

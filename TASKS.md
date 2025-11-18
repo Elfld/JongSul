@@ -1,7 +1,9 @@
 # JongSul 분실물 관리 시스템 개발 Tasks
 
-> 📅 최종 업데이트: 2025-11-11
+> 📅 최종 업데이트: 2025-11-13
 > 🔄 현재 브랜치: `claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC`
+> ✅ 최근 완료: API 에러 처리 및 로깅 강화 (커밋: `2488940`)
+> 📋 다음 작업: Phase 7.4 (알림 설정) 또는 Phase 7.5 (피드백 강화)
 
 ---
 
@@ -119,82 +121,156 @@
 
 ---
 
-### Phase 7: 전체 API 연동
+### Phase 7: 전체 API 연동 (진행 중)
 **우선순위**: 🔥 높음
 
-#### 7.1 인증 시스템 구현
-**상태**: ❌ 미구현 (회원가입/로그인 없음)
+#### 7.1 인증 시스템 구현 (완료)
+**상태**: ✅ 완료
 
-- [ ] **인증 API 엔드포인트**
-  - [ ] POST /api/users/register - 회원가입 프록시
-  - [ ] POST /api/users/login - 로그인 프록시
+- [x] **인증 API 엔드포인트**
+  - [x] POST /api/users/register - 회원가입 프록시
+  - [x] POST /api/users/login - 로그인 프록시
 
-- [ ] **인증 상태 관리**
-  - [ ] 전역 상태 (Context API 또는 Zustand)
-  - [ ] access_token 저장 (localStorage/sessionStorage)
-  - [ ] Bearer Token 자동 추가 (fetch interceptor)
+- [x] **인증 상태 관리**
+  - [x] 전역 상태 (Context API)
+  - [x] access_token 저장 (localStorage)
+  - [x] Bearer Token 수동 추가
 
-- [ ] **로그인 페이지 UI**
-  - [ ] /login 페이지 생성
-  - [ ] 이메일/비밀번호 폼
-  - [ ] 회원가입 링크
-  - [ ] 에러 처리
+- [x] **로그인 페이지 UI**
+  - [x] /login 페이지 생성
+  - [x] 이메일/비밀번호 폼
+  - [x] 회원가입 링크
+  - [x] 에러 처리
+  - [x] 로그인 복귀 기능 (redirect parameter)
 
-- [ ] **회원가입 페이지 UI**
-  - [ ] /register 페이지 생성
-  - [ ] 이메일/비밀번호/이름/연락처 폼
-  - [ ] 유효성 검증
-  - [ ] 중복 체크
+- [x] **회원가입 페이지 UI**
+  - [x] /register 페이지 생성
+  - [x] 이메일/비밀번호/이름 폼 (최소 검증)
+  - [x] 로그인 페이지로 리다이렉트 (자동 로그인 없음)
 
-#### 7.2 소유권 주장 API 연동 (서약서 페이지)
-**상태**: ❌ 미구현 (TODO 주석만 존재)
-**위치**: `src/app/claim/[id]/page.tsx:64`
+- [x] **인증 가드**
+  - [x] 마이페이지 접근 제한
+  - [x] 클레임 페이지 로그인 확인
+  - [x] ConfirmDialog 컴포넌트
 
-- [ ] **API 엔드포인트**
-  - [ ] POST /api/items/[id]/claim 프록시 생성
-  - [ ] 인증 헤더 추가 (Authorization: Bearer {token})
+#### 7.2 소유권 주장 API 연동 (완료)
+**상태**: ✅ 완료
+**커밋**: `9089e3d`
 
-- [ ] **claim/[id] 페이지 수정**
-  - [ ] handleAgree 함수에서 API 호출
-  - [ ] ClaimResponse 타입 처리 (pickup_code, expires_at)
-  - [ ] 에러 처리 (401 인증 실패, 409 이미 신청됨 등)
-  - [ ] 성공 시 코드 표시
-  - [ ] 로딩 상태 처리
+- [x] **타입 정의**
+  - [x] PickupCodeResponse 타입
+  - [x] ClaimResponse 타입
 
-#### 7.3 마이페이지 API 연동
-**상태**: ❌ 미구현 (Mock 데이터 사용 중)
-**위치**: `src/app/mypage/page.tsx:19,80`
+- [x] **API 엔드포인트**
+  - [x] POST /api/items/[id]/claim 프록시 생성
+  - [x] 인증 헤더 추가 (Authorization: Bearer {token})
+  - [x] 에러 처리 (401, 404, 409, 422, 500+)
 
-- [ ] **API 엔드포인트**
-  - [ ] GET /api/items/me - 내 예약 목록 프록시
-  - [ ] GET /api/items/me/[id] - 내 예약 상세 프록시
-  - [ ] DELETE /api/items/[id]/claim - 예약 취소 프록시 (추가 필요)
+- [x] **claim/[id] 페이지 수정**
+  - [x] Mock 코드 생성 제거
+  - [x] handleAgree async 함수로 변경
+  - [x] ClaimResponse 타입 처리 (pickup_code, expires_at)
+  - [x] 로딩/에러 상태 추가
 
-- [ ] **mypage 페이지 수정**
-  - [ ] Mock 데이터 제거
-  - [ ] useEffect에서 /api/items/me 호출
-  - [ ] 로딩 상태 처리
-  - [ ] 빈 목록 처리
+- [x] **ClaimAgreement 컴포넌트**
+  - [x] loading, error props 추가
+  - [x] 로딩 중 버튼 비활성화
+  - [x] 에러 메시지 표시
 
-- [ ] **예약 취소 기능**
-  - [ ] handleConfirmCancel 함수에서 API 호출
-  - [ ] 성공 시 목록에서 제거 또는 상태 업데이트
-  - [ ] 에러 처리
-  - [ ] Toast 알림 (성공/실패)
+#### 7.3 마이페이지 API 연동 (완료)
+**상태**: ✅ 완료
+**커밋**: `6a2ef44`
+**위치**: `src/app/mypage/page.tsx`
+
+- [x] **API 엔드포인트**
+  - [x] GET /api/items/me - 내 예약 목록 프록시
+  - [x] GET /api/items/me/[id] - 내 예약 상세 프록시 (pickup_code 포함)
+
+- [x] **타입 정의 수정**
+  - [x] MyItemDetailResponse 타입 추가 (`src/lib/types/lostItem.ts`)
+  - [x] ClaimedItem 타입을 API 응답 구조에 맞게 수정
+    - [x] `tags: TagResponse[]` (기존: `string[]`)
+    - [x] `code`, `expires_at` 필드 제거 (상세 API에서만 제공)
+    - [x] `status: string` (기존: 'pending' | 'completed')
+
+- [x] **mypage 페이지 수정**
+  - [x] Mock 데이터 완전 제거
+  - [x] useEffect에서 /api/items/me 호출
+  - [x] 로딩 상태 스피너 처리
+  - [x] 에러 상태 메시지 처리
+  - [x] 빈 목록 메시지 표시
+  - [x] 2열 그리드 레이아웃 적용 (`grid-cols-1 md:grid-cols-2`)
+  - [x] 401 에러 시 로그인 페이지 자동 이동
+
+- [x] **카드 클릭 시 상세 API 호출**
+  - [x] handleItemClick에서 /api/items/me/[id] 호출
+  - [x] pickup_code는 상세 API에서만 제공 (목록 API에는 없음)
+  - [x] 상세 로딩 중 스피너 표시
+
+- [x] **MyPageItemDetailModal 수정**
+  - [x] "예약 유효기간" → "코드 유효기간" 라벨 변경
+  - [x] detailData, detailLoading props 추가
+  - [x] 로딩 중 "코드 로딩 중..." 표시
+  - [x] 에러 시 "코드를 불러올 수 없습니다" 표시
+
+- [x] **예약 취소 기능**
+  - [x] DELETE API 미구현 - 관련 코드 주석 처리
+  - [x] 백엔드 확인 후 구현 예정
+
+#### 7.3.5 API 에러 처리 및 로깅 강화 (완료)
+**상태**: ✅ 완료
+**커밋**: `2488940`
+
+- [x] **Claim API 에러 처리 강화**
+  - [x] 400 Bad Request 전용 핸들러 추가
+  - [x] 에러 응답에 `raw` 데이터 포함 (디버깅용)
+  - [x] `/api/items/[id]/claim/route.ts`
+
+- [x] **서버 측 로깅 추가**
+  - [x] 모든 API 프록시에 일관된 로깅 형식 적용
+  - [x] 요청 시작 로그: `console.log('[API명] 외부 API 호출:', url)`
+  - [x] 성공 로그: `console.log('[API명] 성공:', { 주요 정보 })`
+  - [x] 에러 로그: `console.error('[API명] 외부 API 에러:', { status, statusText, error })`
+  - [x] 네트워크 에러 로그: `console.error('[API명] 네트워크 에러:', { error, stack })`
+  - [x] 적용 파일:
+    - [x] `/api/items/[id]/claim/route.ts`
+    - [x] `/api/items/me/route.ts`
+    - [x] `/api/items/me/[id]/route.ts`
+
+- [x] **클라이언트 로깅 강화**
+  - [x] `/claim/[id]/page.tsx`
+    - [x] `[Claim] API 호출 시작:` 로그
+    - [x] `[Claim] API 성공:` 로그
+    - [x] `[Claim] API 에러:` 로그 (status, statusText, errorData)
+    - [x] 400 에러 특별 처리
+
+- [x] **로깅 목적**
+  - [x] 400 에러 원인 파악 용이성
+  - [x] API 요청/응답 디버깅
+  - [x] 프로덕션 트러블슈팅
 
 #### 7.4 알림 설정 API 연동 (마이페이지)
-**상태**: ❌ 미구현 (API 명세 확인 필요)
+**상태**: ⏸️ 보류 (API 명세 확인 필요)
 
 - [ ] API 명세 확인 (백엔드 팀 문의)
-- [ ] 관심 태그 저장 API 연동
-- [ ] 알림 설정 조회 API 연동
+- [ ] 관심 태그 저장 API 엔드포인트 확인
+- [ ] 알림 설정 조회 API 엔드포인트 확인
+- [ ] OpenAPI 명세에 없음 - 백엔드 문의 필요
 
 #### 7.5 에러 처리 및 피드백 강화
-- [ ] 전역 에러 핸들러
-- [ ] Toast 알림 시스템 (sonner 또는 react-hot-toast)
-- [ ] 401 에러 시 자동 로그인 페이지 이동
-- [ ] 네트워크 에러 재시도 로직
-- [ ] 낙관적 업데이트 (Optimistic Update)
+**상태**: ⏸️ 계획 단계
+
+**Option A: Toast 시스템 도입**
+- [ ] sonner 또는 react-hot-toast 설치
+- [ ] 전역 Toaster 컴포넌트 설정
+- [ ] alert() → toast() 전환
+- [ ] 성공/에러 Toast 일관성 확보
+- [ ] 전역 apiClient 유틸리티 생성
+- [ ] 401 에러 자동 로그인 페이지 이동
+
+**Option B: 현재 상태 유지**
+- [ ] 기존 alert() 및 state 기반 에러 처리 유지
+- [ ] 필요 시 커스텀 Toast 컴포넌트 제작
 
 ---
 
@@ -208,19 +284,23 @@
 | GET /items/{id} | ✅ | `/api/items/[id]/route.ts` |
 | GET /tags | ✅ | `/api/tags/route.ts` |
 
-### ❌ 미구현 (Protected API - 인증 필요)
-| API | 우선순위 | TODO 위치 |
-|-----|----------|-----------|
-| POST /items/{id}/claim | 🔥 높음 | `claim/[id]/page.tsx:64` |
-| GET /items/me | 🔥 높음 | `mypage/page.tsx:19` |
-| GET /items/me/{id} | 🟡 중간 | 마이페이지 상세 |
-| DELETE /items/{id}/claim | 🔥 높음 | `mypage/page.tsx:80` |
+### ✅ 구현 완료 (인증 API)
+| API | 상태 | 파일 |
+|-----|------|------|
+| POST /users/register | ✅ | `/api/users/register/route.ts` |
+| POST /users/login | ✅ | `/api/users/login/route.ts` |
 
-### ❌ 미구현 (인증 API)
+### ✅ 구현 완료 (Protected API)
+| API | 상태 | 파일 |
+|-----|------|------|
+| POST /items/{id}/claim | ✅ | `/api/items/[id]/claim/route.ts` |
+| GET /items/me | ✅ | `/api/items/me/route.ts` |
+| GET /items/me/{id} | ✅ | `/api/items/me/[id]/route.ts` |
+
+### ❌ 미구현 (Protected API - 인증 필요)
 | API | 우선순위 | 비고 |
 |-----|----------|------|
-| POST /users/register | 🔥 높음 | 회원가입 |
-| POST /users/login | 🔥 높음 | 로그인 |
+| DELETE /items/{id}/claim | 🔴 보류 | OpenAPI 명세 없음, 백엔드 확인 필요 |
 
 ---
 
