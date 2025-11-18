@@ -47,11 +47,16 @@ export interface MyItemDetailResponse {
 /**
  * 상태 인덱스 상수
  * 서버에서 문자열로 오더라도 인덱스로 관리
+ *
+ * 서버 상태 매핑:
+ * - "보관" → AVAILABLE (예약 가능, 카드에 표기 안함)
+ * - "예약" → RESERVED (예약중, 분홍색 배지)
+ * - "찾음" → COMPLETED (수령완료, 회색 배지)
  */
 export const STATUS_INDEX = {
-  LOST: 0,      // 분실
-  STORED: 1,    // 보관 (수령 예약된 물품)
-  FOUND: 2,     // 찾음 (가져간 물품)
+  AVAILABLE: 0,  // 보관 중 (예약 가능한 상태)
+  RESERVED: 1,   // 예약 중 (누군가 예약한 상태)
+  COMPLETED: 2,  // 수령 완료 (찾아간 상태)
 } as const;
 
 /**
@@ -62,11 +67,11 @@ export function getStatusIndex(status: string): number {
   const statusUpper = status.toUpperCase();
 
   // 서버 상태명 매핑 (필요시 여기만 수정)
-  if (statusUpper.includes('LOST') || statusUpper === '분실') return STATUS_INDEX.LOST;
-  if (statusUpper.includes('STORED') || statusUpper === '보관') return STATUS_INDEX.STORED;
-  if (statusUpper.includes('FOUND') || statusUpper === '찾음') return STATUS_INDEX.FOUND;
+  if (statusUpper.includes('STORED') || statusUpper === '보관') return STATUS_INDEX.AVAILABLE;
+  if (statusUpper.includes('RESERVED') || statusUpper === '예약') return STATUS_INDEX.RESERVED;
+  if (statusUpper.includes('FOUND') || statusUpper === '찾음') return STATUS_INDEX.COMPLETED;
 
-  return STATUS_INDEX.LOST; // 기본값
+  return STATUS_INDEX.AVAILABLE; // 기본값
 }
 
 /**
@@ -76,14 +81,14 @@ export function getStatusInfo(status: string) {
   const index = getStatusIndex(status);
 
   switch (index) {
-    case STATUS_INDEX.LOST:
-      return { index, label: '분실', color: 'sky' };
-    case STATUS_INDEX.STORED:
+    case STATUS_INDEX.AVAILABLE:
+      return { index, label: '예약가능', color: 'sky' };
+    case STATUS_INDEX.RESERVED:
       return { index, label: '예약중', color: 'pink' };
-    case STATUS_INDEX.FOUND:
+    case STATUS_INDEX.COMPLETED:
       return { index, label: '수령완료', color: 'gray' };
     default:
-      return { index, label: '분실', color: 'sky' };
+      return { index, label: '예약가능', color: 'sky' };
   }
 }
 

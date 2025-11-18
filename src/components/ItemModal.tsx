@@ -40,8 +40,8 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
   // 상태 정보 가져오기
   const statusInfo = getStatusInfo(item.status);
-  const isReserved = statusInfo.index === STATUS_INDEX.STORED;
-  const isPickedUp = statusInfo.index === STATUS_INDEX.FOUND;
+  const isReserved = statusInfo.index === STATUS_INDEX.RESERVED;
+  const isPickedUp = statusInfo.index === STATUS_INDEX.COMPLETED;
   const isButtonDisabled = isReserved || isPickedUp;
 
   // 분실물 찾기 페이지로 이동

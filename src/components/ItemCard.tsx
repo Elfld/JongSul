@@ -32,7 +32,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
 
   // 상태 정보 가져오기
   const statusInfo = getStatusInfo(item.status);
-  const showStatusChip = statusInfo.index !== STATUS_INDEX.LOST;
+  const showStatusChip = statusInfo.index !== STATUS_INDEX.AVAILABLE;
 
   return (
     <div
@@ -69,7 +69,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           {showStatusChip && (
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${
-                statusInfo.index === STATUS_INDEX.STORED
+                statusInfo.index === STATUS_INDEX.RESERVED
                   ? 'bg-pink-100 text-pink-600'
                   : 'bg-gray-100 text-gray-600'
               }`}
