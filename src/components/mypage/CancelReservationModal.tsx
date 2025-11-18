@@ -20,6 +20,7 @@ export default function CancelReservationModal({
   onConfirm,
 }: CancelReservationModalProps) {
   const [selectedReason, setSelectedReason] = useState<string>('');
+  const [customReason, setCustomReason] = useState<string>('');
 
   const reasons = [
     '일정 변경',
@@ -32,7 +33,17 @@ export default function CancelReservationModal({
       alert('취소 사유를 선택해주세요.');
       return;
     }
-    onConfirm(selectedReason);
+
+    // "기타" 선택 시 커스텀 사유 검증
+    if (selectedReason === '기타') {
+      if (!customReason.trim()) {
+        alert('취소 사유를 입력해주세요.');
+        return;
+      }
+      onConfirm(customReason.trim());
+    } else {
+      onConfirm(selectedReason);
+    }
   };
 
   return (
@@ -65,7 +76,7 @@ export default function CancelReservationModal({
         </p>
 
         {/* 취소 사유 선택 */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-4">
           {reasons.map((reason) => (
             <label
               key={reason}
@@ -87,6 +98,26 @@ export default function CancelReservationModal({
             </label>
           ))}
         </div>
+
+        {/* 기타 사유 입력란 */}
+        {selectedReason === '기타' && (
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              취소 사유를 입력해주세요
+            </label>
+            <textarea
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              placeholder="예: 다른 일정이 생겨서..."
+              className="w-full p-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none resize-none"
+              rows={3}
+              maxLength={100}
+            />
+            <p className="text-xs text-gray-500 mt-1 text-right">
+              {customReason.length}/100
+            </p>
+          </div>
+        )}
 
         {/* 버튼 */}
         <div className="flex gap-3">
