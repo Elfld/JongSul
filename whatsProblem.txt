@@ -1,5 +1,4 @@
-1. 주장 중 취소 눌렀을 때 메인으로 안가지는 경우 존재
-2. 한 번 예약 했던것들 취소하면 모든 사람한테 다시 예약이 안됨. 500에러 뜨는데 아래가 그 내용
+1. 한 번 예약 했던것들 취소하면 모든 사람한테 다시 예약이 안됨. 500에러 뜨는데 아래가 그 내용
 [Claim 프록시] 외부 API 호출: https://skubr5x2p0.execute-api.us-west-2.amazonaws.com/main/items/4/claim
 [Claim 프록시] 네트워크 에러: {
   itemId: '4',
