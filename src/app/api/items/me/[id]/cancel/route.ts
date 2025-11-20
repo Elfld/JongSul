@@ -51,7 +51,7 @@ export async function POST(
     );
   }
 
-  const externalUrl = `${apiBaseUrl}/main/items/me/${itemId}/cancel`;
+  const externalUrl = `${apiBaseUrl}/items/me/${itemId}/cancel`;
   console.log('[Cancel Reservation 프록시] 외부 API 호출:', externalUrl);
 
   try {
