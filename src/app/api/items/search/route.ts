@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 외부 API URL 생성
-    const externalUrl = new URL(`${apiBaseUrl}/items/search/`);
+    const externalUrl = new URL(`${apiBaseUrl}/items/search`);
 
     // 검색 파라미터 전달
     searchParams.forEach((value, key) => {
