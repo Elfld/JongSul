@@ -8,8 +8,7 @@ import { MyItemDetailResponse, getStatusInfo } from '@/lib/types/lostItem';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
 import ClaimedItemCard, { ClaimedItem } from '@/components/mypage/ClaimedItemCard';
 import MyPageItemDetailModal from '@/components/mypage/MyPageItemDetailModal';
-// TODO: DELETE API 구현 후 활성화
-// import CancelReservationModal from '@/components/mypage/CancelReservationModal';
+import CancelReservationModal from '@/components/mypage/CancelReservationModal';
 
 /**
  * 마이페이지
@@ -32,8 +31,7 @@ export default function MyPage() {
   const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
   const [selectedDetailData, setSelectedDetailData] = useState<MyItemDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  // TODO: DELETE API 구현 후 활성화
-  // const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const isLoggingOut = useRef(false);
 
@@ -144,29 +142,75 @@ export default function MyPage() {
   const handleCloseDetailModal = () => {
     setSelectedItem(null);
     setSelectedDetailData(null);
-    // setShowCancelModal(false); // TODO: DELETE API 구현 후 활성화
+    setShowCancelModal(false);
   };
 
-  // TODO: DELETE API 구현 후 활성화
-  /*
   // 예약 취소 버튼 클릭
   const handleCancelReservation = () => {
     setShowCancelModal(true);
   };
 
   // 취소 확정
-  const handleConfirmCancel = (reason: string) => {
-    // API 호출 - 예약 취소 요청
-    console.log('예약 취소:', selectedItem?.id, '사유:', reason);
+  const handleConfirmCancel = async (reason: string) => {
+    if (!selectedItem) return;
 
-    // 성공 시 목록에서 제거 또는 상태 업데이트
-    alert(`예약이 취소되었습니다.\n사유: ${reason}`);
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      router.push('/login?redirect=/mypage');
+      return;
+    }
 
-    // 모든 모달 닫기
-    setShowCancelModal(false);
-    setSelectedItem(null);
+    try {
+      // POST /api/items/me/{id}/cancel API 호출
+      const response = await fetch(`/api/items/me/${selectedItem.id}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cancel_reason: reason,
+        }),
+      });
+
+      if (!response.ok) {
+        // 401: 토큰 만료
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          router.push('/login?redirect=/mypage&message=로그인이 필요합니다.');
+          return;
+        }
+
+        // 403: 권한 없음
+        if (response.status === 403) {
+          alert('이 예약을 취소할 권한이 없습니다.');
+          return;
+        }
+
+        // 404: 예약 없음
+        if (response.status === 404) {
+          alert('예약을 찾을 수 없습니다.');
+          return;
+        }
+
+        throw new Error('예약 취소에 실패했습니다.');
+      }
+
+      // 성공 시 목록에서 제거
+      setClaimedItems(prev => prev.filter(item => item.id !== selectedItem.id));
+
+      alert(`예약이 취소되었습니다.\n사유: ${reason}`);
+
+      // 모든 모달 닫기
+      setShowCancelModal(false);
+      setSelectedItem(null);
+      setSelectedDetailData(null);
+
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
+    }
   };
-  */
 
   // 수령 대기 / 완료 분리
   const pendingItems = claimedItems.filter((item) => {
@@ -297,18 +341,17 @@ export default function MyPage() {
           detailData={selectedDetailData}
           detailLoading={detailLoading}
           onClose={handleCloseDetailModal}
-          // onCancelReservation={handleCancelReservation} // TODO: DELETE API 구현 후 활성화
+          onCancelReservation={handleCancelReservation}
         />
       )}
 
-      {/* TODO: DELETE API 구현 후 활성화
+      {/* 예약 취소 모달 */}
       {showCancelModal && (
         <CancelReservationModal
           onClose={() => setShowCancelModal(false)}
           onConfirm={handleConfirmCancel}
         />
       )}
-      */}
     </div>
   );
 }

@@ -31,7 +31,7 @@ export async function POST(
     );
   }
 
-  const externalUrl = `${apiBaseUrl}/main/items/${itemId}/claim`;
+  const externalUrl = `${apiBaseUrl}/items/${itemId}/claim`;
   console.log('[Claim 프록시] 외부 API 호출:', externalUrl);
 
   try {

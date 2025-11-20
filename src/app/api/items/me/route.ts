@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const externalUrl = `${apiBaseUrl}/main/items/me`;
+  const externalUrl = `${apiBaseUrl}/items/me`;
   console.log('[MyPage 목록] 외부 API 호출:', externalUrl);
 
   try {

@@ -32,7 +32,7 @@ export async function GET(
     );
   }
 
-  const externalUrl = `${apiBaseUrl}/main/items/me/${itemId}`;
+  const externalUrl = `${apiBaseUrl}/items/me/${itemId}`;
   console.log('[MyPage 상세] 외부 API 호출:', externalUrl);
 
   try {

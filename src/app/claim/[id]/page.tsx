@@ -156,7 +156,7 @@ export default function ClaimPage() {
 
   // 취소 처리
   const handleCancel = () => {
-    router.back();
+    router.push('/');
   };
 
   // 에러 상태

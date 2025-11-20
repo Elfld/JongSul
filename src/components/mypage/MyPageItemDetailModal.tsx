@@ -51,14 +51,11 @@ export default function MyPageItemDetailModal({
       })
     : '';
 
-  // TODO: DELETE API 구현 후 활성화
-  /*
   const handleCancelClick = () => {
     if (onCancelReservation) {
       onCancelReservation();
     }
   };
-  */
 
   return (
     <div
@@ -187,7 +184,7 @@ export default function MyPageItemDetailModal({
             )}
           </div>
 
-          {/* TODO: 예약 취소 기능 - DELETE API 구현 후 활성화
+          {/* 예약 취소 버튼 (수령 대기 중일 때만 표시) */}
           {isPending && (
             <button
               onClick={handleCancelClick}
@@ -196,7 +193,6 @@ export default function MyPageItemDetailModal({
               예약 취소
             </button>
           )}
-          */}
         </div>
       </div>
     </div>

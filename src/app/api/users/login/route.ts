@@ -32,8 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. 외부 API 호출
-    // 중요: /main prefix 추가
-    const externalUrl = `${apiBaseUrl}/main/users/login`;
+    const externalUrl = `${apiBaseUrl}/users/login`;
 
     console.log('[로그인 프록시] 외부 API 호출:', externalUrl);
     console.log('[로그인 프록시] Request:', { email: body.email });
