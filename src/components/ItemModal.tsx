@@ -55,13 +55,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // 뒤로가기로 닫기
-  useEffect(() => {
-    history.pushState({ modal: true }, '');
-    const handlePopState = () => onClose();
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
+  // 뒤로가기는 URL 라우팅으로 자동 처리됨 (page.tsx에서 ?modal= 파라미터 관리)
 
   // body 스크롤 방지
   useEffect(() => {
@@ -77,20 +71,16 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
       setShowConfirmDialog(true);
       return;
     }
-    history.back();
-    setTimeout(() => router.push(`/claim/${item.id}`), 10);
+    router.push(`/claim/${item.id}`);
   };
 
   const handleClose = () => {
-    history.back();
+    onClose();
   };
 
   const handleConfirmLogin = () => {
     setShowConfirmDialog(false);
-    history.back();
-    setTimeout(() => {
-      router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
-    }, 10);
+    router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
   };
 
   const handleCancelLogin = () => {
