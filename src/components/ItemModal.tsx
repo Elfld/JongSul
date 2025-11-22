@@ -260,7 +260,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="w-4 h-4 text-gray-500" />
-                  <h3 className="text-sm font-semibold text-gray-500">분실함 위치</h3>
+                  <h3 className="text-sm font-semibold text-gray-500">보관함 위치</h3>
                 </div>
                 <p className="text-lg text-gray-800">{item.location || '위치 정보 없음'}</p>
               </div>

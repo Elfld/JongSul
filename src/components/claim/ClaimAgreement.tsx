@@ -59,11 +59,7 @@ export default function ClaimAgreement({
             <strong>3.</strong> 분실물 수령 시 신분증 확인에 동의합니다.
           </li>
           <li>
-            <strong>4.</strong> 수령 후 7일 이내 찾아가지 않을 경우,
-            자동으로 소유권 주장이 취소됨을 인지합니다.
-          </li>
-          <li>
-            <strong>5.</strong> 본 서약의 내용을 충분히 이해하였으며,
+            <strong>4.</strong> 본 서약의 내용을 충분히 이해하였으며,
             이에 따른 모든 책임을 본인이 부담함을 확인합니다.
           </li>
         </ol>
