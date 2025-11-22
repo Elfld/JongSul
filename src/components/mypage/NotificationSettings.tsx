@@ -2,34 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
+import { TagService } from '@/lib/api/tags';
+import { TagResponse } from '@/lib/types/lostItem';
 
 /**
  * 알림 설정 컴포넌트
  *
  * 기능:
+ * - 서버에서 카테고리 목록 로드 (캐싱 적용)
  * - 관심 카테고리 선택/해제
  * - localStorage에 설정 저장
  * - 선택된 카테고리 시각적 표시
  */
 
-const CATEGORIES = [
-  '시계',
-  '지갑',
-  '카드',
-  '인형',
-  '가방',
-  '우산',
-  '열쇠',
-  '핸드폰',
-  '이어폰',
-  '텀블러',
-  '책',
-  '의류',
-];
-
 export default function NotificationSettings() {
+  const [categories, setCategories] = useState<TagResponse[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
+
+  // 서버에서 카테고리 목록 로드
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const tags = await TagService.fetchAllTags();
+        setCategories(tags);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   // localStorage에서 설정 불러오기
   useEffect(() => {
@@ -74,22 +80,28 @@ export default function NotificationSettings() {
 
       {/* 카테고리 칩들 */}
       <div className="flex flex-wrap gap-3 mb-6">
-        {CATEGORIES.map((category) => {
-          const isSelected = selectedCategories.includes(category);
-          return (
-            <button
-              key={category}
-              onClick={() => toggleCategory(category)}
-              className={`px-4 py-2 rounded-full font-medium transition-all ${
-                isSelected
-                  ? 'bg-sky-500 text-white shadow-md scale-105'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {category}
-            </button>
-          );
-        })}
+        {categoriesLoading ? (
+          <p className="text-gray-500 text-sm">카테고리 로딩 중...</p>
+        ) : categories.length === 0 ? (
+          <p className="text-gray-500 text-sm">카테고리를 불러올 수 없습니다</p>
+        ) : (
+          categories.map((category) => {
+            const isSelected = selectedCategories.includes(category.name);
+            return (
+              <button
+                key={category.id}
+                onClick={() => toggleCategory(category.name)}
+                className={`px-4 py-2 rounded-full font-medium transition-all ${
+                  isSelected
+                    ? 'bg-sky-500 text-white shadow-md scale-105'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {category.name}
+              </button>
+            );
+          })
+        )}
       </div>
 
       {/* 안내 문구 */}

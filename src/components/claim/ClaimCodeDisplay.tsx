@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Check } from 'lucide-react';
 
 interface ClaimCodeDisplayProps {
   code: string;
@@ -14,23 +13,11 @@ interface ClaimCodeDisplayProps {
  *
  * 기능:
  * - 6자리 수령 코드 표시
- * - 복사 버튼
  * - 유효기간 표시
  * - 홈으로 돌아가기
  */
 export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayProps) {
   const router = useRouter();
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      alert('복사에 실패했습니다.');
-    }
-  };
 
   const handleGoHome = () => {
     router.push('/');
@@ -62,7 +49,7 @@ export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayPr
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-700 mb-4">수령 코드</h2>
 
-        <div className="flex items-center justify-center gap-4 mb-4">
+        <div className="flex items-center justify-center mb-4">
           {/* 코드 디스플레이 */}
           <div className="flex gap-2">
             {codeDigits.map((digit, index) => (
@@ -74,26 +61,7 @@ export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayPr
               </div>
             ))}
           </div>
-
-          {/* 복사 버튼 */}
-          <button
-            onClick={handleCopy}
-            className="p-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-            title="복사"
-          >
-            {copied ? (
-              <Check className="w-6 h-6 text-green-600" />
-            ) : (
-              <Copy className="w-6 h-6 text-gray-600" />
-            )}
-          </button>
         </div>
-
-        {copied && (
-          <p className="text-sm text-green-600 font-medium">
-            코드가 복사되었습니다!
-          </p>
-        )}
       </div>
 
       {/* 안내 문구 */}
