@@ -88,8 +88,8 @@ export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps)
   );
 
   // 태그 목록 컴포넌트
-  const TagList = () => (
-    <div className="flex gap-2">
+  const TagList = ({ wrap = false }: { wrap?: boolean }) => (
+    <div className={`flex gap-2 ${wrap ? 'flex-wrap' : ''}`}>
       {item.tags.map((tag) => (
         <span
           key={tag.id}
@@ -137,7 +137,7 @@ export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps)
         <ItemImage size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-2">
-            <TagList />
+            <TagList wrap />
             <StatusBadge />
           </div>
           <LocationDate />
