@@ -1,7 +1,7 @@
 // components/ItemModal.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -17,13 +17,10 @@ interface ItemModalProps {
 /**
  * 분실물 상세 모달 컴포넌트
  *
- * OpenAPI 명세 적용:
- * - photo_url 사용
- * - tags 배열 모두 표시
- * - registered_at datetime 포맷팅
- * - status 필드 추가
- * - location null 처리
- * - description 제거 (API에 없음)
+ * 모바일 최적화:
+ * - 이미지 영역 크게 (aspect-square)
+ * - 설명 부분 2열 그리드
+ * - ESC 키 / 뒤로가기로 닫기
  */
 export default function ItemModal({ item, onClose }: ItemModalProps) {
   const router = useRouter();
@@ -38,11 +35,53 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     day: 'numeric',
   });
 
+  // 짧은 날짜 (모바일용)
+  const shortDate = new Date(item.registered_at).toLocaleDateString('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+  });
+
   // 상태 정보 가져오기
   const statusInfo = getStatusInfo(item.status);
   const isReserved = statusInfo.label === '예약중';
   const isPickedUp = statusInfo.label === '수령완료';
   const isButtonDisabled = isReserved || isPickedUp;
+
+  // ESC 키로 닫기
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // 뒤로가기로 닫기 (모바일 포함)
+  useEffect(() => {
+    // 모달 열릴 때 히스토리에 상태 추가
+    history.pushState({ modal: true }, '');
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [onClose]);
+
+  // 모달 열릴 때 body 스크롤 방지
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   // 분실물 찾기 페이지로 이동
   const handleClaimClick = () => {
@@ -54,13 +93,25 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
       return;
     }
 
-    router.push(`/claim/${item.id}`);
+    // 히스토리 정리 후 이동
+    history.back();
+    setTimeout(() => {
+      router.push(`/claim/${item.id}`);
+    }, 10);
+  };
+
+  // 닫기 핸들러 (히스토리 정리)
+  const handleClose = () => {
+    history.back();
   };
 
   // 로그인 확인 다이얼로그 - 확인 버튼
   const handleConfirmLogin = () => {
     setShowConfirmDialog(false);
-    router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
+    history.back();
+    setTimeout(() => {
+      router.push(`/login?redirect=/claim/${item.id}&message=소유권 주장을 위해 로그인이 필요합니다.`);
+    }, 10);
   };
 
   // 로그인 확인 다이얼로그 - 취소 버튼
@@ -70,105 +121,111 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
+      className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-end md:items-center justify-center z-50 md:p-4"
+      onClick={handleClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
+        className="bg-white w-full md:rounded-3xl md:max-w-4xl md:max-h-[90vh] max-h-[95vh] overflow-hidden flex flex-col md:flex-row rounded-t-3xl animate-in slide-in-from-bottom md:slide-in-from-bottom-0 md:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative md:w-2/3 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center p-12">
+        {/* 모바일: 드래그 핸들 */}
+        <div className="md:hidden flex justify-center py-2">
+          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+        </div>
+
+        {/* 이미지 영역 */}
+        <div className="relative aspect-square md:aspect-auto md:w-1/2 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0">
           {item.photo_url && !imageError ? (
             <Image
               src={item.photo_url}
               alt={item.tags[0]?.name || '분실물'}
               fill
-              className="object-contain rounded-xl"
+              className="object-contain p-4"
               onError={() => setImageError(true)}
             />
           ) : (
-            <Package className="w-48 h-48 text-sky-400" />
+            <Package className="w-32 h-32 md:w-48 md:h-48 text-sky-400" />
           )}
+          {/* 닫기 버튼 - 모바일에서 이미지 위에 */}
+          <button
+            onClick={handleClose}
+            className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full transition-colors shadow-md md:hidden"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
-        <div className="md:w-1/3 p-8 overflow-y-auto flex flex-col">
-          <div className="flex justify-between items-start mb-6">
+
+        {/* 정보 영역 */}
+        <div className="md:w-1/2 p-5 md:p-8 overflow-y-auto flex flex-col">
+          {/* 헤더 - 데스크톱 */}
+          <div className="hidden md:flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold text-sky-600">분실물 상세</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 hover:bg-sky-50 rounded-full transition-colors flex-shrink-0"
             >
               <X className="w-6 h-6 text-gray-500" />
             </button>
           </div>
-          <div className="space-y-6 flex-grow">
-            {/* 태그 목록 */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Package className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-500">카테고리</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {item.tags.map((tag) => (
-                  <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-lg font-medium">
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            </div>
 
-            {/* 상태 */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                {isReserved || isPickedUp ? (
-                  <CheckCircle className="w-4 h-4 text-gray-500" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-gray-500" />
-                )}
-                <h3 className="text-sm font-semibold text-gray-500">상태</h3>
-              </div>
-              <p
-                className={`text-lg font-medium ${
-                  isReserved
-                    ? 'text-pink-600'
-                    : isPickedUp
-                    ? 'text-gray-600'
-                    : 'text-gray-800'
-                }`}
-              >
-                {statusInfo.label}
-              </p>
-            </div>
+          {/* 태그 목록 */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {item.tags.map((tag) => (
+              <span key={tag.id} className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-base font-medium">
+                {tag.name}
+              </span>
+            ))}
+            {/* 상태 칩 */}
+            <span
+              className={`px-3 py-1 rounded-full text-base font-medium ${
+                isReserved
+                  ? 'bg-pink-100 text-pink-600'
+                  : isPickedUp
+                  ? 'bg-gray-100 text-gray-600'
+                  : 'bg-green-100 text-green-600'
+              }`}
+            >
+              {statusInfo.label}
+            </span>
+          </div>
 
+          {/* 정보 그리드 - 모바일 2열 */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
             {/* 등록 날짜 */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-500">등록 날짜</h3>
+            <div className="bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-500">등록일</span>
               </div>
-              <p className="text-lg text-gray-800">{formattedDate}</p>
+              <p className="text-sm md:text-base font-medium text-gray-800">
+                <span className="md:hidden">{shortDate}</span>
+                <span className="hidden md:inline">{formattedDate}</span>
+              </p>
             </div>
 
             {/* 위치 */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-gray-500">분실함 위치</h3>
+            <div className="bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-500">위치</span>
               </div>
-              <p className="text-lg text-gray-800">
-                {item.location || '위치 정보 없음'}
+              <p className="text-sm md:text-base font-medium text-gray-800 truncate">
+                {item.location || '정보 없음'}
               </p>
             </div>
           </div>
+
+          {/* 예약 버튼 */}
           <button
             onClick={handleClaimClick}
             disabled={isButtonDisabled}
-            className={`mt-8 w-full py-3 rounded-full font-semibold transition-colors ${
+            className={`mt-auto w-full py-3.5 rounded-full font-semibold transition-colors ${
               isButtonDisabled
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-sky-500 text-white hover:bg-sky-600'
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700'
             }`}
           >
-            수령 예약하기
+            {isReserved ? '예약중인 물품입니다' : isPickedUp ? '수령 완료된 물품입니다' : '수령 예약하기'}
           </button>
         </div>
       </div>
@@ -185,25 +242,3 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
     </div>
   );
 }
-
-/**
- * ============================================================
- * LEGACY - 이전 LostItem 기반 코드 (참고용)
- * ============================================================
- */
-
-// import { LostItem } from '@/lib/types/lostItem';
-
-// interface ItemModalProps {
-//   item: LostItem;
-//   onClose: () => void;
-// }
-
-// <h2 className="text-2xl font-bold text-sky-600">{item.tag}</h2>
-// <img src={item.image} alt={item.tag} className="max-w-full max-h-full object-contain rounded-xl" />
-// <p className="text-lg text-gray-800">📅 {item.date}</p>
-// <p className="text-lg text-gray-800">📍 {item.location}</p>
-// <div>
-//   <h3 className="text-sm font-semibold text-gray-500 mb-2">상세 설명</h3>
-//   <p className="text-lg text-gray-800">{item.description}</p>
-// </div>
