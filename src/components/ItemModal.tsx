@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Package, MapPin, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Package, MapPin, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { ItemResponse, getStatusInfo } from '@/lib/types/lostItem';
@@ -128,11 +128,6 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
         className="bg-white w-full md:rounded-3xl md:max-w-4xl md:max-h-[90vh] max-h-[95vh] overflow-hidden flex flex-col md:flex-row rounded-t-3xl animate-in slide-in-from-bottom md:slide-in-from-bottom-0 md:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 모바일: 드래그 핸들 */}
-        <div className="md:hidden flex justify-center py-2">
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-        </div>
-
         {/* 이미지 영역 */}
         <div className="relative aspect-square md:aspect-auto md:w-1/2 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0">
           {item.photo_url && !imageError ? (
