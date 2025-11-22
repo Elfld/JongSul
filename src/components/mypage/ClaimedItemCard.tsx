@@ -80,7 +80,7 @@ export default function ClaimedItemCard({ item, onClick }: ClaimedItemCardProps)
 
             {/* 상태 배지 */}
             <span
-              className={`text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1 ${
+              className={`text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${
                 isPending
                   ? 'bg-yellow-100 text-yellow-700'
                   : 'bg-green-100 text-green-700'
