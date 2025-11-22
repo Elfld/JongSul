@@ -1,7 +1,8 @@
 // app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import CategoryChips from '@/components/CategoryChips';
 import ItemCard from '@/components/ItemCard';
@@ -20,7 +21,12 @@ import { TagService } from '@/lib/api/tags';
  * - /items/search 엔드포인트 사용
  * - 무한 스크롤 제거 (서버에서 페이지네이션 미지원)
  */
-export default function Home() {
+
+// useSearchParams()는 Suspense 경계 필요
+function HomeContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // 태그 목록 (API에서 로드)
   const [availableTags, setAvailableTags] = useState<TagResponse[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
@@ -39,8 +45,21 @@ export default function Home() {
     fetchItems,
   } = useItemSearch();
 
-  // 모달 상태
-  const [selectedItem, setSelectedItem] = useState<ItemResponse | null>(null);
+  // 모달 상태 - URL 파라미터 기반
+  const modalItemId = searchParams.get('modal');
+  const selectedItem = modalItemId
+    ? items.find((item) => item.id === Number(modalItemId))
+    : null;
+
+  // 모달 열기 - URL에 파라미터 추가
+  const openModal = (item: ItemResponse) => {
+    router.push(`?modal=${item.id}`, { scroll: false });
+  };
+
+  // 모달 닫기 - 뒤로가기
+  const closeModal = () => {
+    router.back();
+  };
 
   // 태그 목록 로드 (컴포넌트 마운트 시 1회)
   useEffect(() => {
@@ -82,7 +101,7 @@ export default function Home() {
       <main className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
+            <ItemCard key={item.id} item={item} onClick={() => openModal(item)} />
           ))}
         </div>
 
@@ -102,35 +121,16 @@ export default function Home() {
       </main>
 
       {/* 아이템 상세 모달 */}
-      {selectedItem && <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
+      {selectedItem && <ItemModal item={selectedItem} onClose={closeModal} />}
     </div>
   );
 }
 
-/**
- * ============================================================
- * LEGACY - 이전 무한 스크롤 코드 (참고용)
- * ============================================================
- */
-
-// import { useInfiniteScroll } from '@/lib/hooks/useInfiniteScroll';
-// const categories = ['시계', '지갑', '카드', '인형', '가방', '우산', '열쇠', '핸드폰'];
-
-// const [page, setPage] = useState(1);
-// const [hasMore, setHasMore] = useState(true);
-
-// const loadMore = useCallback(async () => {
-//   if (loading || !hasMore) return;
-//   const nextPage = page + 1;
-//   const data = await fetchItems(nextPage, false);
-//   if (data) {
-//     setHasMore(data.hasMore);
-//     setPage(nextPage);
-//   }
-// }, [loading, hasMore, page, fetchItems]);
-
-// const { observerTarget } = useInfiniteScroll(loadMore, { threshold: 0.5 });
-
-// <div ref={observerTarget} className="h-20">
-//   {loading && <LoadingSpinner />}
-// </div>
+// Suspense로 감싸서 export
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
