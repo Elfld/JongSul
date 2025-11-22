@@ -1,246 +1,197 @@
-# 🔄 JongSul 세션 컨텍스트
+# 🔄 JongSul 프로젝트 컨텍스트
 
-> 새 세션 시작 시 이 문서를 먼저 읽고 작업을 시작하세요.
+> **새 세션 시작 시 이 문서를 먼저 읽으세요.**
 >
-> **마지막 업데이트**: 2025-11-11
-> **현재 브랜치**: `claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC`
+> **최종 업데이트**: 2025-11-22
+> **현재 버전**: v1.0.0
 
 ---
 
-## 📌 빠른 개요
+## 📌 프로젝트 한 줄 요약
 
-**프로젝트**: 분실물 관리 시스템 (웹 + 키오스크)
-**현재 단계**: Phase 6.1 완료 (Claim 페이지 API 연동)
-**다음 작업**: Phase 7.1 (인증 시스템 구현)
+**분실물 자동 분류 등록기 키오스크 장치**의 **웹 프론트엔드** 부분
 
 ---
 
-## 🎯 현재 세션 상태
+## 🎯 현재 상태
 
-### 브랜치 정보
-```bash
-브랜치: claude/api-integration-011CUwzEYYyCCeRTQzUvFkcC
-상태: Clean, up to date
-푸시: ✅ 완료
-```
+| 항목 | 상태 |
+|------|------|
+| 핵심 기능 | ✅ 100% 완료 |
+| API 연동 | ✅ 11개 엔드포인트 완료 |
+| 테스트 커버리지 | ❌ 0% |
+| 배포 | ❌ 미정 |
 
-### 최근 완료 작업 (Phase 5~6.1)
-**2025-11-11 완료** - UI 개선 + Claim 페이지 API 연동
+### 완료된 기능
+- 메인 페이지 (검색, 태그 필터, 드래그 스크롤, 상세 모달)
+- 소유권 주장 페이지 (서약서, 픽업 코드 발급)
+- 마이페이지 (예약 목록, 상세 조회, 예약 취소)
+- 로그인/회원가입
+- JWT 인증 시스템
+- 반응형 디자인
 
-1. **Phase 5.1**: ItemCard 아이콘 통일
-   - 이모티콘(📍📅) → lucide-react 아이콘 (MapPin, Calendar)
-
-2. **Phase 5.2**: ItemModal 아이콘 추가
-   - 카테고리/상태/날짜/위치에 lucide-react 아이콘 추가
-
-3. **Phase 5.3**: 마이페이지 카드 외곽선 개선
-   - `border border-gray-100` + `shadow-md` 적용
-
-4. **Phase 5.4**: 서약서 페이지 상단 정보 개선
-   - claim/[id] 페이지 레이아웃 대폭 개선
-   - 좌측: 큰 이미지, 우측: ClaimedItemCard 스타일 정보
-
-**빌드**: ✅ 성공 | **타입 에러**: 0개 | **ESLint**: 0개
-
----
-
-## 📋 다음 할 일
-
-### 우선순위
-
-**🔵 나중** - Phase 4: API 연동
-- Backend API 엔드포인트 확인
-- ItemService 실제 API 연동
-- 마이페이지 API 연동
-
-**🔵 나중** - Phase 3.1: 메인 모달 개선
-- 내가 예약한 분실물 표시 기능
-
-> 새 작업이 주어지면 TASKS.md를 먼저 업데이트하고 시작하세요.
+### 다음 작업
+`next_tasks.md` 참조 - 보안 강화, 테스트 작성, UX 개선 등
 
 ---
 
 ## 🛠️ 기술 스택
 
-### Core
-- **Next.js** 15.5.4 (App Router, Turbopack)
-- **React** 19.1.0
-- **TypeScript** 5
-- **Tailwind CSS** 4
-- **lucide-react** (아이콘)
+| 분류 | 기술 |
+|------|------|
+| Framework | Next.js 15.5.4 (App Router) |
+| Language | TypeScript 5 |
+| UI | React 19.1.0 |
+| Styling | Tailwind CSS 4 |
+| Icons | Lucide React |
+| Build | Turbopack |
 
-### Architecture
-- Service Layer + Custom Hooks
-- SOLID 원칙 적용
-- OpenAPI 명세 기반 타입 정의
+### 아키텍처
+- **패턴**: Service Layer + Custom Hooks
+- **상태 관리**: React Context (AuthContext)
+- **API**: RESTful (Fetch API) + 프록시 레이어
+- **인증**: JWT Bearer Token (localStorage)
 
 ---
 
-## 📁 주요 파일 구조
+## 📁 핵심 파일 구조
 
 ```
-src/
-├── app/
-│   ├── api/              # API Routes
-│   │   ├── health/       # Health check
-│   │   ├── items/        # 분실물 API (목업)
-│   │   │   └── search/   # 검색 프록시
-│   │   └── tags/         # 태그 API
-│   ├── claim/[id]/       # 서약서 페이지
-│   ├── mypage/           # 마이페이지
-│   └── page.tsx          # 메인 (분실물 게시판)
+JongSul/
+├── src/
+│   ├── app/
+│   │   ├── api/                    # API 프록시 (11개)
+│   │   │   ├── items/              # 분실물 CRUD
+│   │   │   ├── tags/               # 태그 목록
+│   │   │   └── users/              # 인증
+│   │   ├── page.tsx                # 메인 (분실물 목록)
+│   │   ├── claim/[id]/page.tsx     # 소유권 주장
+│   │   ├── mypage/page.tsx         # 마이페이지
+│   │   ├── login/page.tsx          # 로그인
+│   │   └── register/page.tsx       # 회원가입
+│   │
+│   ├── components/
+│   │   ├── Header.tsx              # 검색 헤더
+│   │   ├── CategoryChips.tsx       # 태그 필터
+│   │   ├── ItemCard.tsx            # 분실물 카드
+│   │   ├── ItemModal.tsx           # 상세 모달
+│   │   ├── claim/                  # 서약서 관련
+│   │   └── mypage/                 # 마이페이지 관련
+│   │
+│   └── lib/
+│       ├── api/tags.ts             # TagService
+│       ├── contexts/AuthContext.tsx # 인증 상태
+│       ├── hooks/                  # Custom Hooks
+│       └── types/lostItem.ts       # TypeScript 타입
 │
-├── components/
-│   ├── ItemCard.tsx      # 분실물 카드
-│   ├── ItemModal.tsx     # 상세 모달
-│   ├── Header.tsx        # 검색 헤더
-│   ├── CategoryChips.tsx # 카테고리 필터
-│   ├── claim/            # 서약서 관련
-│   └── mypage/           # 마이페이지 관련
-│       ├── ClaimedItemCard.tsx
-│       ├── MyPageItemDetailModal.tsx
-│       └── CancelReservationModal.tsx
+├── docs/                           # 상세 문서
+│   ├── FEATURE_SPECIFICATION.md    # 기능 명세서
+│   └── BUILD_STATUS.md             # 구축 상태
 │
-└── lib/
-    ├── api/              # API 클라이언트 레이어
-    ├── hooks/            # Custom Hooks
-    │   ├── useItemSearch.ts
-    │   ├── useInfiniteScroll.ts
-    │   └── useDragScroll.ts
-    └── types/            # TypeScript 타입
+├── README.md                       # 프로젝트 소개
+├── next_tasks.md                   # 🔥 다음 작업 목록
+├── SESSION_CONTEXT.md              # 이 문서
+└── DEVELOPMENT_PRINCIPLES.md       # 개발 원칙
 ```
 
 ---
 
-## ⚠️ 핵심 개발 원칙
+## 👥 팀 구성
 
-> **자세한 내용**: `DEVELOPMENT_PRINCIPLES.md` 참조
-
-### 1. 페이즈별 커밋 원칙 (CRITICAL)
-- **한 커밋 = 한 Phase**
-- 여러 Phase를 한 커밋에 절대 금지
-- Phase 5.1 완료 → 커밋 → Phase 5.2 시작
-
-### 2. TASKS.md 관리 원칙 (CRITICAL)
-- **매 커밋마다 TASKS.md 최신화**
-- 완료된 작업 `[x]` 체크
-- 커밋 메시지에 이미 내용이 있으므로 중복 기록 불필요
-
-### 3. 작업 지시 처리 원칙 (CRITICAL)
-- 새 작업 받으면 **즉시 TASKS.md에 Phase별 체크리스트 작성**
-- 한 단계씩 해결하면서 최신화
-- Phase 번호 붙여서 구조화
-
-### 4. 코드 품질
-- ESLint 경고 0개 유지
-- 빌드 에러 0개 유지
-- 커밋 전 `npm run build` 필수
+| 역할 | 담당 |
+|------|------|
+| 프론트엔드 | 나 (이 프로젝트) |
+| 백엔드 - AI Recognition | 팀원 1 |
+| 백엔드 - API 서버 | 팀원 2 |
+| 백엔드 - 등록기 관련 | 팀원 3 |
 
 ---
 
-## 🚀 빠른 시작 명령어
+## 🚀 빠른 시작
 
 ```bash
+# 의존성 설치
+npm install
+
 # 개발 서버 실행
 npm run dev
 
 # 빌드 테스트 (커밋 전 필수)
 npm run build
 
-# 브랜치 확인
-git branch
-
-# 현재 상태 확인
-git status
-
-# 커밋 히스토리
-git log --oneline -10
-
-# 최신 코드 받기 (필요시)
-git pull origin claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC
+# 린트
+npm run lint
 ```
 
-### Git 푸시 규칙
+### 환경 변수
+`.env.local` 파일 필요:
 ```bash
-# 항상 -u 옵션 사용
-git push -u origin claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC
-
-# ⚠️ CRITICAL: 브랜치명이 'claude/'로 시작하고 세션 ID로 끝나야 푸시 가능
-# 403 에러 발생 시: 새 브랜치 생성 필요 (세션 ID 불일치)
+API_BASE_URL=https://your-api-server.com/main
 ```
 
 ---
 
-## 💡 중요한 의사결정 기록
+## ⚠️ 개발 원칙 (CRITICAL)
 
-### UI/UX 디자인
-- **아이콘 통일**: lucide-react 사용 (이모티콘 제거)
-- **마이페이지 카드 외곽선**: Option 4 (border + shadow 조합)
-- **서약서 페이지 레이아웃**: ClaimedItemCard 스타일 적용
+> 자세한 내용: `DEVELOPMENT_PRINCIPLES.md`
 
-### 기술 아키텍처
-- **API 연동**: OpenAPI 명세 준수, 프록시 레이어 사용
-- **상태 관리**: Service Layer + Custom Hooks
-- **이미지 처리**: Next.js Image 컴포넌트 + fallback UI
+### 1. 페이즈별 커밋
+- **한 커밋 = 한 Phase**
+- 여러 Phase를 한 커밋에 절대 금지
 
-### 개발 방식
-- **Phase별 독립 커밋**: 한 Phase 완료 → 즉시 커밋
-- **문서 최신화**: TASKS.md, DEVELOPMENT_PRINCIPLES.md 항상 최신 유지
-- **빌드 우선**: 모든 커밋 전 빌드 테스트 필수
-
----
-
-## 📚 추가 문서
-
-### 필수 읽기
-- `TASKS.md` - 전체 작업 계획 및 진행 상황
-- `DEVELOPMENT_PRINCIPLES.md` - 개발 원칙 상세 설명
-
-### 참고 문서
-- `README.md` - 프로젝트 전체 개요
-- `docs/ui-design-spec.txt` - UI 설계 명세
-- `docs/API_INTEGRATION.md` - API 연동 가이드
-- `UI_IMPLEMENTATION_PLAN.md` - UI 구현 계획 (구버전)
-
----
-
-## 🔧 문제 해결
-
-### 브랜치 권한 문제 (403 에러)
+### 2. 커밋 전 필수
 ```bash
-# 새 세션에서 이전 브랜치 푸시 불가 → 새 브랜치 생성
-git checkout -b claude/new-task-name-[세션ID]
-git push -u origin claude/new-task-name-[세션ID]
+npm run build  # 빌드 에러 0개 확인
+npm run lint   # ESLint 경고 0개 확인
 ```
 
-### 빌드 에러
+### 3. 문서 최신화
+- 작업 완료 후 `next_tasks.md` 업데이트
+- 큰 변경 시 `SESSION_CONTEXT.md` 업데이트
+
+---
+
+## 📚 문서 가이드
+
+| 목적 | 문서 |
+|------|------|
+| 다음 할 일 확인 | `next_tasks.md` |
+| 전체 기능 이해 | `docs/FEATURE_SPECIFICATION.md` |
+| 구축 현황 파악 | `docs/BUILD_STATUS.md` |
+| 프로젝트 소개 | `README.md` |
+| 개발 원칙 | `DEVELOPMENT_PRINCIPLES.md` |
+
+---
+
+## 🔧 자주 묻는 질문
+
+### API 서버 연결이 안 돼요
+1. `.env.local`에 `API_BASE_URL` 설정 확인
+2. `/api/health`로 헬스체크 테스트
+
+### 빌드 에러가 나요
 ```bash
-# node_modules 재설치
 rm -rf node_modules package-lock.json
 npm install
 npm run build
 ```
 
-### 타입 에러
-- IDE에서 타입 정의 확인
-- `src/lib/types/lostItem.ts` 참조
+### 타입 에러가 나요
+- `src/lib/types/lostItem.ts` 타입 정의 확인
+- IDE TypeScript 서버 재시작
 
 ---
 
-## ✅ 세션 시작 체크리스트
+## ✅ 새 세션 체크리스트
 
-새 세션 시작 시 다음을 확인하세요:
-
-- [ ] 이 문서(`SESSION_CONTEXT.md`) 읽기 완료
-- [ ] `TASKS.md` 확인하여 현재 진행 상황 파악
-- [ ] `DEVELOPMENT_PRINCIPLES.md` 개발 원칙 숙지
-- [ ] 현재 브랜치 확인 (`git branch`)
-- [ ] 의존성 설치 확인 (`npm install`)
-- [ ] 개발 서버 테스트 (`npm run dev`)
-
-**준비 완료!** 🚀
+```
+[ ] 이 문서 읽기 완료
+[ ] next_tasks.md 확인하여 다음 작업 파악
+[ ] npm install (의존성 확인)
+[ ] npm run dev (개발 서버 테스트)
+[ ] 작업 시작!
+```
 
 ---
 
-**Last Updated**: 2025-11-09 17:15
-**Session**: claude/ui2-improvements-011CUwzEYYyCCeRTQzUvFkcC
+**Last Updated**: 2025-11-22
