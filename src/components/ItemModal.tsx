@@ -128,8 +128,8 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
         className="bg-white w-full md:rounded-3xl md:max-w-4xl md:max-h-[90vh] max-h-[95vh] overflow-hidden flex flex-col md:flex-row rounded-t-3xl animate-in slide-in-from-bottom md:slide-in-from-bottom-0 md:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 이미지 영역 */}
-        <div className="relative aspect-square md:aspect-auto md:w-1/2 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0">
+        {/* 이미지 영역 - 모바일: 위쪽에 4:3 비율, 데스크톱: 왼쪽 절반 */}
+        <div className="relative aspect-[4/3] md:aspect-auto md:w-1/2 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0 md:flex-shrink">
           {item.photo_url && !imageError ? (
             <Image
               src={item.photo_url}
@@ -150,8 +150,8 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
           </button>
         </div>
 
-        {/* 정보 영역 */}
-        <div className="md:w-1/2 p-5 md:p-8 overflow-y-auto flex flex-col">
+        {/* 정보 영역 - 모바일: 아래쪽 스크롤 가능, 데스크톱: 오른쪽 절반 */}
+        <div className="flex-1 md:w-1/2 p-5 md:p-8 overflow-y-auto flex flex-col">
           {/* 헤더 - 데스크톱 */}
           <div className="hidden md:flex justify-between items-start mb-6">
             <h2 className="text-2xl font-bold text-sky-600">분실물 상세</h2>
