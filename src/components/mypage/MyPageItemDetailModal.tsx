@@ -140,7 +140,7 @@ export default function MyPageItemDetailModal({
 
             {/* 위치 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 mb-2">분실함 위치</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">보관함 위치</h3>
               <div className="flex items-center gap-2 text-lg text-gray-800">
                 <MapPin className="w-5 h-5 text-gray-500" />
                 <span>{item.location || '위치 정보 없음'}</span>
@@ -163,7 +163,7 @@ export default function MyPageItemDetailModal({
                       <span>{detailData.pickup_code.code}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      분실함에서 이 코드를 사용하여 수령하세요
+                      키오스크에서 이 코드를 입력하여 수령하세요
                     </p>
                   </>
                 ) : (

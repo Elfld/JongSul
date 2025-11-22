@@ -23,8 +23,8 @@ export default function CancelReservationModal({
   const [customReason, setCustomReason] = useState<string>('');
 
   const reasons = [
-    '일정 변경',
-    '다른 방법으로 찾음',
+    '내 것이 아님',
+    '사진이 불분명함',
     '기타',
   ];
 
