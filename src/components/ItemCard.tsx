@@ -39,7 +39,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
-      <div className="relative h-48 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
         {item.photo_url && !imageError ? (
           <Image
             src={item.photo_url}
