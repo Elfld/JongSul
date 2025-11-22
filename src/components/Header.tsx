@@ -58,8 +58,8 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
       <h1 className="text-2xl font-bold text-sky-600 whitespace-nowrap">분실물 찾기</h1>
 
       <div className="flex items-center gap-4">
-        {/* 검색창 - md 이상에서 표시 */}
-        <div className="relative hidden md:block flex-1 max-w-96">
+        {/* 검색창 - md 이상에서 표시, 기본 384px, 공간 부족 시 축소 */}
+        <div className="relative hidden md:block w-96 shrink min-w-[200px]">
           <input
             type="text"
             value={searchQuery}
