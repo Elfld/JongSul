@@ -226,35 +226,28 @@ export default function MyPage() {
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleGoHome}
-              className="p-2 hover:bg-white rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </button>
-            <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
-          </div>
+        <div className="flex items-center gap-4 mb-4">
+          <button
+            onClick={handleGoHome}
+            className="p-2 hover:bg-white rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <h1 className="text-3xl font-bold text-gray-800">마이페이지</h1>
+        </div>
 
-          {/* 계정 정보 */}
-          <div className="flex items-center gap-3">
-            {/* 이메일 */}
-            {user?.email && (
-              <span className="text-sm text-gray-600 bg-white px-3 py-2 rounded-lg">
-                {user.email}
-              </span>
-            )}
-
-            {/* 로그아웃 버튼 */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-white rounded-lg transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">로그아웃</span>
-            </button>
-          </div>
+        {/* 계정 정보 카드 */}
+        <div className="bg-white rounded-xl px-4 py-3 mb-6 flex items-center justify-between shadow-sm">
+          <span className="text-sm text-gray-600 truncate mr-4">
+            {user?.email || '로그인 필요'}
+          </span>
+          <button
+            onClick={handleLogout}
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">로그아웃</span>
+          </button>
         </div>
 
         {/* 섹션 1: 알림 설정 */}
