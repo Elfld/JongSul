@@ -85,7 +85,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
     <header className="bg-gradient-to-b from-sky-50 to-white border-b border-sky-100 px-6 py-4 flex items-center justify-between relative">
       <h1 className="text-2xl font-bold text-sky-600 whitespace-nowrap">분실물 찾기</h1>
 
-      <div className="flex items-center gap-4 min-w-0 flex-1 justify-end">
+      <div className="flex items-center gap-4 min-w-0 flex-1 justify-end ml-8">
         {/* 검색바 - 반응형으로 줄어들다가 compact 모드로 전환 */}
         {!isCompact ? (
           <div
