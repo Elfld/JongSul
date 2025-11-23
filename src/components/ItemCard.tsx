@@ -79,8 +79,8 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           )}
         </div>
         <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <MapPin className="w-4 h-4 text-gray-500" />
-          <span>{item.location || '위치 정보 없음'}</span>
+          <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <span className="truncate">{item.location || '위치 정보 없음'}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-500 text-xs">
           <Calendar className="w-4 h-4" />

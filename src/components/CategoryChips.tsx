@@ -50,7 +50,7 @@ export default function CategoryChips({
             onClearAll();
           }}
           disabled={selectedTagIds.length === 0}
-          className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+          className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all ${
             selectedTagIds.length > 0
               ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer'
               : 'bg-gray-200 text-gray-600 opacity-50'
