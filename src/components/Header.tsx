@@ -86,30 +86,31 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
       <h1 className="text-2xl font-bold text-sky-600 whitespace-nowrap">분실물 찾기</h1>
 
       <div className="flex items-center gap-4 min-w-0 flex-1 justify-end ml-8">
-        {/* 검색바 - 반응형으로 줄어들다가 compact 모드로 전환 */}
-        {!isCompact ? (
-          <div
-            ref={searchBarRef}
-            className="relative w-96 shrink min-w-[120px] transition-all duration-300 ease-out animate-in fade-in zoom-in-95 duration-200"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="물품 유형이나 위치를 검색하세요"
-              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border-2 border-sky-200 shadow-sm focus:outline-none focus:border-sky-400 transition-all"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-400" />
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsSearchExpanded(true)}
-            className="flex-shrink-0 w-11 h-11 rounded-full bg-white border-2 border-sky-200 flex items-center justify-center shadow-sm hover:border-sky-400 hover:shadow-md transition-all duration-300 ease-out animate-in fade-in zoom-in-75 duration-200"
-            aria-label="검색"
-          >
-            <Search className="w-5 h-5 text-sky-400" />
-          </button>
-        )}
+        {/* 검색바 - compact 모드에서 버튼처럼 축소 */}
+        <div
+          ref={searchBarRef}
+          onClick={isCompact ? () => setIsSearchExpanded(true) : undefined}
+          className={`relative bg-white border-2 border-sky-200 shadow-sm transition-all duration-300 ease-out
+            ${isCompact
+              ? 'w-11 h-11 rounded-full cursor-pointer hover:border-sky-400 hover:shadow-md flex-shrink-0'
+              : 'w-96 shrink min-w-[120px] rounded-full'
+            }`}
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="물품 유형이나 위치를 검색하세요"
+            className={`w-full bg-transparent focus:outline-none transition-all duration-300
+              ${isCompact
+                ? 'opacity-0 pointer-events-none h-0 p-0'
+                : 'opacity-100 pl-10 pr-4 py-2.5'
+              }`}
+          />
+          <Search className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 text-sky-400 transition-all duration-300
+            ${isCompact ? 'left-1/2 -translate-x-1/2' : 'left-3'}`}
+          />
+        </div>
 
         <button
           onClick={() => router.push(isAuthenticated ? '/mypage' : '/login')}
