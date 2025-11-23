@@ -53,12 +53,12 @@ export default function ItemCard({ item, isMyReservation, onClick }: ItemCardPro
           <Package className="w-16 h-16 text-sky-400" />
         )}
 
-        {/* 내 예약 리본 배지 */}
+        {/* 내 예약 삼각형 배지 */}
         {isMyReservation && (
-          <div className="absolute -top-1 -right-1 w-20 h-20 overflow-hidden">
-            <div className="absolute top-4 -right-6 w-24 bg-pink-500 text-white text-xs font-bold py-1 text-center rotate-45 shadow-md">
+          <div className="absolute top-0 right-0 w-0 h-0 border-t-[60px] border-l-[60px] border-t-pink-500 border-l-transparent">
+            <span className="absolute -top-[52px] -left-[28px] text-white text-[10px] font-bold rotate-45 whitespace-nowrap">
               내 예약
-            </div>
+            </span>
           </div>
         )}
       </div>
