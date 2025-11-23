@@ -90,7 +90,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
         {!isCompact ? (
           <div
             ref={searchBarRef}
-            className="relative w-96 shrink min-w-[120px] transition-all duration-300 ease-out"
+            className="relative w-96 shrink min-w-[120px] transition-all duration-300 ease-out animate-in fade-in zoom-in-95 duration-200"
           >
             <input
               type="text"
@@ -104,7 +104,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
         ) : (
           <button
             onClick={() => setIsSearchExpanded(true)}
-            className="flex-shrink-0 w-11 h-11 rounded-full bg-white border-2 border-sky-200 flex items-center justify-center shadow-sm hover:border-sky-400 hover:shadow-md transition-all duration-300 ease-out"
+            className="flex-shrink-0 w-11 h-11 rounded-full bg-white border-2 border-sky-200 flex items-center justify-center shadow-sm hover:border-sky-400 hover:shadow-md transition-all duration-300 ease-out animate-in fade-in zoom-in-75 duration-200"
             aria-label="검색"
           >
             <Search className="w-5 h-5 text-sky-400" />
