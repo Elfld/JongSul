@@ -23,16 +23,18 @@ function MyPageContent() {
   const searchParams = useSearchParams();
   const { user, logout, isAuthenticated, isLoading } = useAuth();
 
-  // URL 파라미터에서 모달 ID 가져오기
-  const modalItemId = searchParams.get('modal');
-
   // 예약 목록 상태
   const [claimedItems, setClaimedItems] = useState<ClaimedItem[]>([]);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // 모달 상태
-  const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
+  // 모달 상태 - URL 파라미터 기반
+  const modalItemId = searchParams.get('modal');
+  const selectedItem = modalItemId
+    ? claimedItems.find(item => item.id === Number(modalItemId)) || null
+    : null;
+
+  // 상세 데이터 및 취소 모달 상태
   const [selectedDetailData, setSelectedDetailData] = useState<MyItemDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -93,32 +95,36 @@ function MyPageContent() {
     fetchMyItems();
   }, [isAuthenticated, isLoading, router]);
 
-  // URL 파라미터로 모달 자동 오픈
+  // 모달 열릴 때 상세 데이터 fetch
   useEffect(() => {
-    if (!modalItemId || itemsLoading || claimedItems.length === 0) return;
-
-    const targetItem = claimedItems.find(item => item.id === Number(modalItemId));
-    if (targetItem && !selectedItem) {
-      // 직접 모달 열기 로직 (handleItemClick 대신)
-      setSelectedItem(targetItem);
-      setDetailLoading(true);
+    if (!selectedItem) {
       setSelectedDetailData(null);
-
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        fetch(`/api/items/me/${targetItem.id}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        })
-          .then(res => res.ok ? res.json() : Promise.reject())
-          .then((data: MyItemDetailResponse) => setSelectedDetailData(data))
-          .catch(() => setSelectedItem(null))
-          .finally(() => setDetailLoading(false));
-      }
-
-      // URL에서 modal 파라미터 제거 (히스토리 교체)
-      router.replace('/mypage', { scroll: false });
+      return;
     }
-  }, [modalItemId, itemsLoading, claimedItems, selectedItem, router]);
+
+    const fetchDetailData = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      setDetailLoading(true);
+      try {
+        const response = await fetch(`/api/items/me/${selectedItem.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data: MyItemDetailResponse = await response.json();
+          setSelectedDetailData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch detail:', error);
+      } finally {
+        setDetailLoading(false);
+      }
+    };
+
+    fetchDetailData();
+  }, [selectedItem]);
 
   const handleGoHome = () => {
     router.push('/');
@@ -130,50 +136,15 @@ function MyPageContent() {
     router.replace('/');
   };
 
-  // 분실물 카드 클릭 핸들러 - 상세 정보 가져오기
-  const handleItemClick = async (item: ClaimedItem) => {
-    setSelectedItem(item);
-    setDetailLoading(true);
-    setSelectedDetailData(null);
-
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      alert('로그인이 필요합니다.');
-      router.push('/login?redirect=/mypage');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/items/me/${item.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('access_token');
-          router.push('/login?redirect=/mypage&message=로그인이 필요합니다.');
-          return;
-        }
-        throw new Error('예약 상세 정보를 불러오는데 실패했습니다.');
-      }
-
-      const detailData: MyItemDetailResponse = await response.json();
-      setSelectedDetailData(detailData);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
-      setSelectedItem(null); // 에러 시 모달 닫기
-    } finally {
-      setDetailLoading(false);
-    }
+  // 분실물 카드 클릭 핸들러 - URL로 모달 열기
+  const handleItemClick = (item: ClaimedItem) => {
+    router.push(`/mypage?modal=${item.id}`, { scroll: false });
   };
 
-  // 상세 모달 닫기
+  // 상세 모달 닫기 - 뒤로가기
   const handleCloseDetailModal = () => {
-    setSelectedItem(null);
-    setSelectedDetailData(null);
     setShowCancelModal(false);
+    router.back();
   };
 
   // 예약 취소 버튼 클릭
@@ -233,10 +204,9 @@ function MyPageContent() {
 
       alert(`예약이 취소되었습니다.\n사유: ${reason}`);
 
-      // 모든 모달 닫기
+      // 모든 모달 닫기 (URL 기반이므로 뒤로가기)
       setShowCancelModal(false);
-      setSelectedItem(null);
-      setSelectedDetailData(null);
+      router.back();
 
     } catch (err) {
       alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
