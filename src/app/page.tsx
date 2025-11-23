@@ -9,6 +9,7 @@ import ItemCard from '@/components/ItemCard';
 import ItemModal from '@/components/ItemModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useItemSearch } from '@/lib/hooks/useItemSearch';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { ItemResponse, TagResponse } from '@/lib/types/lostItem';
 import { TagService } from '@/lib/api/tags';
 
@@ -26,10 +27,14 @@ import { TagService } from '@/lib/api/tags';
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
 
   // 태그 목록 (API에서 로드)
   const [availableTags, setAvailableTags] = useState<TagResponse[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
+
+  // 내 예약 아이템 ID 목록 (로그인 시)
+  const [myReservedIds, setMyReservedIds] = useState<number[]>([]);
 
   // 검색 & 필터링 상태 관리 (Custom Hook)
   const {
@@ -77,6 +82,35 @@ function HomeContent() {
     loadTags();
   }, []);
 
+  // 로그인 시 내 예약 목록 ID 가져오기
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setMyReservedIds([]);
+      return;
+    }
+
+    const fetchMyReservedItems = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('/api/items/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const ids = data.map((item: { id: number }) => item.id);
+          setMyReservedIds(ids);
+        }
+      } catch (error) {
+        console.error('Failed to fetch my reserved items:', error);
+      }
+    };
+
+    fetchMyReservedItems();
+  }, [isAuthenticated]);
+
   // 검색어/필터 변경 시 재검색
   useEffect(() => {
     if (tagsLoading) return; // 태그 로딩 중에는 검색하지 않음
@@ -101,7 +135,12 @@ function HomeContent() {
       <main className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} onClick={() => openModal(item)} />
+            <ItemCard
+              key={item.id}
+              item={item}
+              isMyReservation={myReservedIds.includes(item.id)}
+              onClick={() => openModal(item)}
+            />
           ))}
         </div>
 
@@ -121,7 +160,13 @@ function HomeContent() {
       </main>
 
       {/* 아이템 상세 모달 */}
-      {selectedItem && <ItemModal item={selectedItem} onClose={closeModal} />}
+      {selectedItem && (
+        <ItemModal
+          item={selectedItem}
+          isMyReservation={myReservedIds.includes(selectedItem.id)}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }

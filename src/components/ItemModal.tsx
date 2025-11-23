@@ -11,6 +11,7 @@ import ConfirmDialog from './ConfirmDialog';
 
 interface ItemModalProps {
   item: ItemResponse;
+  isMyReservation?: boolean;
   onClose: () => void;
 }
 
@@ -20,7 +21,7 @@ interface ItemModalProps {
  * - 데스크톱: 원본 레이아웃 (이미지 2/3 + 설명 1/3, 세로 나열)
  * - 모바일: 바텀시트 (이미지 위 + 설명 아래 2열 그리드)
  */
-export default function ItemModal({ item, onClose }: ItemModalProps) {
+export default function ItemModal({ item, isMyReservation, onClose }: ItemModalProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [imageError, setImageError] = useState(false);
@@ -72,6 +73,11 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
       return;
     }
     router.push(`/claim/${item.id}`);
+  };
+
+  // 내 예약 확인 - 마이페이지로 이동 후 모달 오픈
+  const handleMyReservationClick = () => {
+    router.push(`/mypage?modal=${item.id}`);
   };
 
   const handleClose = () => {
@@ -165,17 +171,26 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
             </div>
 
             {/* 버튼 */}
-            <button
-              onClick={handleClaimClick}
-              disabled={isButtonDisabled}
-              className={`mt-auto w-full py-3.5 rounded-full font-semibold transition-colors ${
-                isButtonDisabled
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700'
-              }`}
-            >
-              {isReserved ? '예약중인 물품입니다' : isPickedUp ? '수령 완료된 물품입니다' : '수령 예약하기'}
-            </button>
+            {isMyReservation ? (
+              <button
+                onClick={handleMyReservationClick}
+                className="mt-auto w-full py-3.5 rounded-full font-semibold transition-colors bg-pink-500 text-white hover:bg-pink-600 active:bg-pink-700"
+              >
+                내 예약 확인
+              </button>
+            ) : (
+              <button
+                onClick={handleClaimClick}
+                disabled={isButtonDisabled}
+                className={`mt-auto w-full py-3.5 rounded-full font-semibold transition-colors ${
+                  isButtonDisabled
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-sky-500 text-white hover:bg-sky-600 active:bg-sky-700'
+                }`}
+              >
+                {isReserved ? '예약중인 물품입니다' : isPickedUp ? '수령 완료된 물품입니다' : '수령 예약하기'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -266,17 +281,26 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               </div>
             </div>
 
-            <button
-              onClick={handleClaimClick}
-              disabled={isButtonDisabled}
-              className={`mt-8 w-full py-3 rounded-full font-semibold transition-colors ${
-                isButtonDisabled
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-sky-500 text-white hover:bg-sky-600'
-              }`}
-            >
-              수령 예약하기
-            </button>
+            {isMyReservation ? (
+              <button
+                onClick={handleMyReservationClick}
+                className="mt-8 w-full py-3 rounded-full font-semibold transition-colors bg-pink-500 text-white hover:bg-pink-600"
+              >
+                내 예약 확인
+              </button>
+            ) : (
+              <button
+                onClick={handleClaimClick}
+                disabled={isButtonDisabled}
+                className={`mt-8 w-full py-3 rounded-full font-semibold transition-colors ${
+                  isButtonDisabled
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-sky-500 text-white hover:bg-sky-600'
+                }`}
+              >
+                {isReserved ? '예약중인 물품입니다' : isPickedUp ? '수령 완료된 물품입니다' : '수령 예약하기'}
+              </button>
+            )}
           </div>
         </div>
       </div>

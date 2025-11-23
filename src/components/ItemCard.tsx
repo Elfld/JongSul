@@ -8,6 +8,7 @@ import { ItemResponse, getStatusInfo } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
   item: ItemResponse;
+  isMyReservation?: boolean;
   onClick: () => void;
 }
 
@@ -20,7 +21,7 @@ interface ItemCardProps {
  * - registered_at datetime 포맷팅
  * - location null 처리
  */
-export default function ItemCard({ item, onClick }: ItemCardProps) {
+export default function ItemCard({ item, isMyReservation, onClick }: ItemCardProps) {
   const [imageError, setImageError] = useState(false);
 
   // 날짜 포맷팅 (ISO 8601 → YYYY-MM-DD)
@@ -39,7 +40,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center overflow-hidden">
         {item.photo_url && !imageError ? (
           <Image
             src={item.photo_url}
@@ -50,6 +51,15 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           />
         ) : (
           <Package className="w-16 h-16 text-sky-400" />
+        )}
+
+        {/* 내 예약 리본 배지 */}
+        {isMyReservation && (
+          <div className="absolute -top-1 -right-1 w-20 h-20 overflow-hidden">
+            <div className="absolute top-4 -right-6 w-24 bg-pink-500 text-white text-xs font-bold py-1 text-center rotate-45 shadow-md">
+              내 예약
+            </div>
+          </div>
         )}
       </div>
       <div className="p-4 bg-white">

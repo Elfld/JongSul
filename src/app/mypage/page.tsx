@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Package, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { MyItemDetailResponse, getStatusInfo } from '@/lib/types/lostItem';
@@ -18,9 +18,13 @@ import CancelReservationModal from '@/components/mypage/CancelReservationModal';
  * 2. 수령 예정/완료 분실물 목록 (ClaimedItemCard)
  */
 
-export default function MyPage() {
+function MyPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, logout, isAuthenticated, isLoading } = useAuth();
+
+  // URL 파라미터에서 모달 ID 가져오기
+  const modalItemId = searchParams.get('modal');
 
   // 예약 목록 상태
   const [claimedItems, setClaimedItems] = useState<ClaimedItem[]>([]);
@@ -88,6 +92,33 @@ export default function MyPage() {
 
     fetchMyItems();
   }, [isAuthenticated, isLoading, router]);
+
+  // URL 파라미터로 모달 자동 오픈
+  useEffect(() => {
+    if (!modalItemId || itemsLoading || claimedItems.length === 0) return;
+
+    const targetItem = claimedItems.find(item => item.id === Number(modalItemId));
+    if (targetItem && !selectedItem) {
+      // 직접 모달 열기 로직 (handleItemClick 대신)
+      setSelectedItem(targetItem);
+      setDetailLoading(true);
+      setSelectedDetailData(null);
+
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        fetch(`/api/items/me/${targetItem.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+          .then(res => res.ok ? res.json() : Promise.reject())
+          .then((data: MyItemDetailResponse) => setSelectedDetailData(data))
+          .catch(() => setSelectedItem(null))
+          .finally(() => setDetailLoading(false));
+      }
+
+      // URL에서 modal 파라미터 제거 (히스토리 교체)
+      router.replace('/mypage', { scroll: false });
+    }
+  }, [modalItemId, itemsLoading, claimedItems, selectedItem, router]);
 
   const handleGoHome = () => {
     router.push('/');
@@ -346,5 +377,18 @@ export default function MyPage() {
         />
       )}
     </div>
+  );
+}
+
+// Suspense로 감싸서 export (useSearchParams 사용 시 필요)
+export default function MyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+      </div>
+    }>
+      <MyPageContent />
+    </Suspense>
   );
 }
