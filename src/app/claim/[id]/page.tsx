@@ -10,46 +10,6 @@ import ClaimCodeDisplay from '@/components/claim/ClaimCodeDisplay';
 import { ItemResponse, ClaimResponse } from '@/lib/types/lostItem';
 
 /**
- * 영어 에러 메시지를 한국어로 번역
- */
-const translateErrorMessage = (message: string): string => {
-  const translations: Record<string, string> = {
-    // 예약 관련
-    'Item is already claimed': '이미 예약된 물품입니다.',
-    'Item already claimed': '이미 예약된 물품입니다.',
-    'This item is already claimed': '이미 예약된 물품입니다.',
-    'Item has already been claimed': '이미 예약된 물품입니다.',
-    'Already claimed': '이미 예약된 물품입니다.',
-    // 권한 관련
-    'Unauthorized': '로그인이 필요합니다.',
-    'Not authorized': '권한이 없습니다.',
-    'Permission denied': '권한이 없습니다.',
-    // 물품 관련
-    'Item not found': '물품을 찾을 수 없습니다.',
-    'Not found': '찾을 수 없습니다.',
-    // 일반
-    'Bad request': '잘못된 요청입니다.',
-    'Internal server error': '서버 오류가 발생했습니다.',
-  };
-
-  // 정확히 일치하는 번역 찾기
-  if (translations[message]) {
-    return translations[message];
-  }
-
-  // 부분 일치 검사 (대소문자 무시)
-  const lowerMessage = message.toLowerCase();
-  for (const [eng, kor] of Object.entries(translations)) {
-    if (lowerMessage.includes(eng.toLowerCase())) {
-      return kor;
-    }
-  }
-
-  // 번역 없으면 원본 반환
-  return message;
-};
-
-/**
  * 분실물 찾기 페이지
  *
  * 플로우:
@@ -162,15 +122,8 @@ export default function ClaimPage() {
           return;
         }
 
-        // 400: 상세 에러 메시지 표시
-        if (response.status === 400) {
-          const detailMessage = errorData.detail || errorData.error || '잘못된 요청입니다.';
-          throw new Error(translateErrorMessage(detailMessage));
-        }
-
-        // 기타 에러 표시
-        const errorMessage = errorData.error || errorData.detail || '소유권 주장에 실패했습니다.';
-        throw new Error(translateErrorMessage(errorMessage));
+        // 에러 메시지 표시 (API route에서 한글로 반환)
+        throw new Error(errorData.error || '소유권 주장에 실패했습니다.');
       }
 
       const data: ClaimResponse = await response.json();

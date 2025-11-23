@@ -65,14 +65,16 @@ export async function POST(
         error: data,
       });
 
-      // 400: Bad Request (잘못된 요청)
+      // 400: Bad Request (이미 예약된 경우 등)
       if (response.status === 400) {
+        // 외부 API detail에서 "claimed" 관련 메시지 감지
+        const detail = (data.detail || data.error || '').toLowerCase();
+        const errorMessage = detail.includes('claimed') || detail.includes('already')
+          ? '이미 예약된 물품입니다.'
+          : '잘못된 요청입니다.';
+
         return NextResponse.json(
-          {
-            error: '잘못된 요청입니다.',
-            detail: data.detail || data.error || '요청 데이터를 확인해주세요.',
-            raw: data, // 디버깅용
-          },
+          { error: errorMessage },
           { status: 400 }
         );
       }
