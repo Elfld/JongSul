@@ -24,7 +24,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const checkSearchBarWidth = useCallback(() => {
     if (searchBarRef.current && !isCompact) {
       const width = searchBarRef.current.offsetWidth;
-      if (width < 150) {
+      if (width < 180) {
         setIsCompact(true);
       }
     }
@@ -32,9 +32,9 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
     // compact 모드일 때는 가용 공간으로 판단
     if (isCompact) {
       const headerWidth = window.innerWidth;
-      // 제목(~130px) + 버튼2개(~100px) + 패딩(48px) + gap(32px) = ~310px
-      const availableWidth = headerWidth - 310;
-      if (availableWidth >= 200) {
+      // 제목(~130px) + 버튼2개(~100px) + 패딩(48px) + gap(32px) + 여유공간(40px) = ~350px
+      const availableWidth = headerWidth - 350;
+      if (availableWidth >= 220) {
         setIsCompact(false);
       }
     }
