@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { User, Lock, Loader2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -101,7 +101,7 @@ function LoginForm() {
                 이메일 주소
               </label>
               <div className="flex items-center border-b border-gray-300 pb-2">
-                <User className="w-5 h-5 text-gray-400 mr-3" />
+                <Mail className="w-5 h-5 text-gray-400 mr-3" />
                 <input
                   id="email"
                   type="email"

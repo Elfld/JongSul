@@ -46,7 +46,7 @@ export default function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-20 px-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       {/* 반투명 배경 */}
       <div
         className="absolute inset-0 bg-black/20 backdrop-blur-sm"
