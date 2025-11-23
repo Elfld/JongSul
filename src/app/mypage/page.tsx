@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Package, LogOut, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, LogOut, Loader2, User } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { MyItemDetailResponse, getStatusInfo } from '@/lib/types/lostItem';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
@@ -239,9 +239,14 @@ function MyPageContent() {
 
         {/* 계정 정보 카드 */}
         <div className="bg-white rounded-xl px-4 py-3 mb-6 flex items-center justify-between shadow-sm">
-          <span className="text-sm text-gray-600 truncate mr-4">
-            {user?.email || '로그인 필요'}
-          </span>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex-shrink-0 w-9 h-9 bg-sky-100 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-sky-600" />
+            </div>
+            <span className="text-sm text-gray-700 truncate">
+              {user?.email || '로그인 필요'}
+            </span>
+          </div>
           <button
             onClick={handleLogout}
             className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"

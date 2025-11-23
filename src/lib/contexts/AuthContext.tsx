@@ -40,13 +40,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 컴포넌트 마운트 시 localStorage에서 토큰 로드
+  // 컴포넌트 마운트 시 localStorage에서 토큰 & 유저 정보 로드
   useEffect(() => {
     const savedToken = localStorage.getItem('access_token');
+    const savedUser = localStorage.getItem('user');
+
     if (savedToken) {
       setToken(savedToken);
-      // TODO: 토큰으로 사용자 정보 조회 API 필요 시 구현
-      // 현재는 로그인 응답에 user 정보가 없어서 email만 임시 저장
+
+      // 저장된 유저 정보 복원
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch {
+          // 파싱 실패 시 무시
+        }
+      }
     }
     setIsLoading(false);
   }, []);
@@ -85,8 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(data.access_token);
       localStorage.setItem('access_token', data.access_token);
 
-      // user 정보는 서버에서 안 주므로 email만 임시 저장
-      setUser({ email });
+      // user 정보 저장 (서버에서 안 주므로 email만)
+      const userInfo = { email };
+      setUser(userInfo);
+      localStorage.setItem('user', JSON.stringify(userInfo));
     } catch (error) {
       // Error 객체가 아닌 경우만 로깅 (네트워크 에러 등)
       if (!(error instanceof Error)) {
@@ -158,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
   };
 
   const value: AuthContextType = {
