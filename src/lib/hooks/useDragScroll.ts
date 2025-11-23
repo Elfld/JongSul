@@ -16,7 +16,7 @@ export interface DragScrollOptions {
  * - 버튼 위에서도 드래그 가능
  */
 export function useDragScroll(options: DragScrollOptions = {}) {
-  const { scrollSpeed = 2, dragThreshold = 5 } = options;
+  const { scrollSpeed = 1, dragThreshold = 5 } = options;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hasDragged, setHasDragged] = useState(false); // 실제로 드래그했는지
