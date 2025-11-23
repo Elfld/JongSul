@@ -1,5 +1,5 @@
 // lib/hooks/useDragScroll.ts
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 
 export interface DragScrollOptions {
   scrollSpeed?: number;
@@ -14,62 +14,73 @@ export interface DragScrollOptions {
  * - 드래그와 클릭 구분 (dragThreshold)
  * - 텍스트 선택 방지
  * - 버튼 위에서도 드래그 가능
+ * - 마우스가 영역 밖으로 나가도 드래그 유지 (document 레벨 이벤트)
  */
 export function useDragScroll(options: DragScrollOptions = {}) {
   const { scrollSpeed = 1, dragThreshold = 5 } = options;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [hasDragged, setHasDragged] = useState(false); // 실제로 드래그했는지
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [hasDragged, setHasDragged] = useState(false);
 
+  // useRef로 값 저장 (리렌더링 없이 최신값 유지)
+  const dragState = useRef({
+    startX: 0,
+    scrollLeft: 0,
+  });
+
+  // 마우스 다운 - 드래그 시작
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!containerRef.current) return;
 
     setIsDragging(true);
-    setHasDragged(false); // 드래그 시작 시 초기화
-    setStartX(e.pageX - containerRef.current.offsetLeft);
-    setScrollLeft(containerRef.current.scrollLeft);
+    setHasDragged(false);
+
+    dragState.current = {
+      startX: e.pageX - containerRef.current.offsetLeft,
+      scrollLeft: containerRef.current.scrollLeft,
+    };
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging || !containerRef.current) return;
+  // 드래그 중일 때 document 레벨 이벤트 등록
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
 
       const x = e.pageX - containerRef.current.offsetLeft;
+      const { startX, scrollLeft } = dragState.current;
       const distance = Math.abs(x - startX);
 
-      // dragThreshold 이상 이동하면 실제 드래그로 인식
       if (distance > dragThreshold) {
         e.preventDefault();
         setHasDragged(true);
         const walk = (x - startX) * scrollSpeed;
         containerRef.current.scrollLeft = scrollLeft - walk;
       }
-    },
-    [isDragging, startX, scrollLeft, scrollSpeed, dragThreshold]
-  );
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    // hasDragged는 유지 (클릭 핸들러에서 확인용)
-    setTimeout(() => setHasDragged(false), 0); // 다음 틱에 초기화
-  }, []);
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      setTimeout(() => setHasDragged(false), 0);
+    };
 
-  const handleMouseLeave = useCallback(() => {
-    setIsDragging(false);
-    setTimeout(() => setHasDragged(false), 0);
-  }, []);
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging, scrollSpeed, dragThreshold]);
 
   return {
     containerRef,
     isDragging,
-    hasDragged, // 실제 드래그 여부 반환
+    hasDragged,
     handlers: {
       onMouseDown: handleMouseDown,
-      onMouseMove: handleMouseMove,
-      onMouseUp: handleMouseUp,
-      onMouseLeave: handleMouseLeave,
     },
   };
 }
