@@ -8,6 +8,7 @@ import { ItemResponse, getStatusInfo } from '@/lib/types/lostItem';
 
 interface ItemCardProps {
   item: ItemResponse;
+  isMyReservation?: boolean;
   onClick: () => void;
 }
 
@@ -20,7 +21,7 @@ interface ItemCardProps {
  * - registered_at datetime 포맷팅
  * - location null 처리
  */
-export default function ItemCard({ item, onClick }: ItemCardProps) {
+export default function ItemCard({ item, isMyReservation, onClick }: ItemCardProps) {
   const [imageError, setImageError] = useState(false);
 
   // 날짜 포맷팅 (ISO 8601 → YYYY-MM-DD)
@@ -39,7 +40,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
       onClick={onClick}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer"
     >
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center overflow-hidden">
         {item.photo_url && !imageError ? (
           <Image
             src={item.photo_url}
@@ -50,6 +51,15 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           />
         ) : (
           <Package className="w-16 h-16 text-sky-400" />
+        )}
+
+        {/* 내 예약 삼각형 배지 */}
+        {isMyReservation && (
+          <div className="absolute top-0 right-0 w-0 h-0 border-t-[80px] border-l-[80px] border-t-pink-500 border-l-transparent">
+            <span className="absolute -top-[62px] -left-[42px] text-white text-xs font-bold rotate-45 whitespace-nowrap">
+              내 예약
+            </span>
+          </div>
         )}
       </div>
       <div className="p-4 bg-white">
@@ -79,8 +89,8 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
           )}
         </div>
         <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <MapPin className="w-4 h-4 text-gray-500" />
-          <span>{item.location || '위치 정보 없음'}</span>
+          <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <span className="truncate">{item.location || '위치 정보 없음'}</span>
         </div>
         <div className="flex items-center gap-2 text-gray-500 text-xs">
           <Calendar className="w-4 h-4" />

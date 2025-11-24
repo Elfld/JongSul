@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Package, LogOut, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Package, LogOut, Loader2, User } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { MyItemDetailResponse, getStatusInfo } from '@/lib/types/lostItem';
 import NotificationSettings from '@/components/mypage/NotificationSettings';
@@ -18,8 +18,9 @@ import CancelReservationModal from '@/components/mypage/CancelReservationModal';
  * 2. 수령 예정/완료 분실물 목록 (ClaimedItemCard)
  */
 
-export default function MyPage() {
+function MyPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, logout, isAuthenticated, isLoading } = useAuth();
 
   // 예약 목록 상태
@@ -27,8 +28,13 @@ export default function MyPage() {
   const [itemsLoading, setItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // 모달 상태
-  const [selectedItem, setSelectedItem] = useState<ClaimedItem | null>(null);
+  // 모달 상태 - URL 파라미터 기반
+  const modalItemId = searchParams.get('modal');
+  const selectedItem = modalItemId
+    ? claimedItems.find(item => item.id === Number(modalItemId)) || null
+    : null;
+
+  // 상세 데이터 및 취소 모달 상태
   const [selectedDetailData, setSelectedDetailData] = useState<MyItemDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -89,6 +95,37 @@ export default function MyPage() {
     fetchMyItems();
   }, [isAuthenticated, isLoading, router]);
 
+  // 모달 열릴 때 상세 데이터 fetch
+  useEffect(() => {
+    if (!selectedItem) {
+      setSelectedDetailData(null);
+      return;
+    }
+
+    const fetchDetailData = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
+      setDetailLoading(true);
+      try {
+        const response = await fetch(`/api/items/me/${selectedItem.id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data: MyItemDetailResponse = await response.json();
+          setSelectedDetailData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch detail:', error);
+      } finally {
+        setDetailLoading(false);
+      }
+    };
+
+    fetchDetailData();
+  }, [selectedItem]);
+
   const handleGoHome = () => {
     router.push('/');
   };
@@ -99,50 +136,15 @@ export default function MyPage() {
     router.replace('/');
   };
 
-  // 분실물 카드 클릭 핸들러 - 상세 정보 가져오기
-  const handleItemClick = async (item: ClaimedItem) => {
-    setSelectedItem(item);
-    setDetailLoading(true);
-    setSelectedDetailData(null);
-
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      alert('로그인이 필요합니다.');
-      router.push('/login?redirect=/mypage');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/items/me/${item.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('access_token');
-          router.push('/login?redirect=/mypage&message=로그인이 필요합니다.');
-          return;
-        }
-        throw new Error('예약 상세 정보를 불러오는데 실패했습니다.');
-      }
-
-      const detailData: MyItemDetailResponse = await response.json();
-      setSelectedDetailData(detailData);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
-      setSelectedItem(null); // 에러 시 모달 닫기
-    } finally {
-      setDetailLoading(false);
-    }
+  // 분실물 카드 클릭 핸들러 - URL로 모달 열기
+  const handleItemClick = (item: ClaimedItem) => {
+    router.push(`/mypage?modal=${item.id}`, { scroll: false });
   };
 
-  // 상세 모달 닫기
+  // 상세 모달 닫기 - 뒤로가기
   const handleCloseDetailModal = () => {
-    setSelectedItem(null);
-    setSelectedDetailData(null);
     setShowCancelModal(false);
+    router.back();
   };
 
   // 예약 취소 버튼 클릭
@@ -202,10 +204,9 @@ export default function MyPage() {
 
       alert(`예약이 취소되었습니다.\n사유: ${reason}`);
 
-      // 모든 모달 닫기
+      // 모든 모달 닫기 (URL 기반이므로 뒤로가기)
       setShowCancelModal(false);
-      setSelectedItem(null);
-      setSelectedDetailData(null);
+      router.back();
 
     } catch (err) {
       alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
@@ -238,9 +239,14 @@ export default function MyPage() {
 
         {/* 계정 정보 카드 */}
         <div className="bg-white rounded-xl px-4 py-3 mb-6 flex items-center justify-between shadow-sm">
-          <span className="text-sm text-gray-600 truncate mr-4">
-            {user?.email || '로그인 필요'}
-          </span>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex-shrink-0 w-9 h-9 bg-sky-100 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-sky-600" />
+            </div>
+            <span className="text-sm text-gray-700 truncate">
+              {user?.email || '로그인 필요'}
+            </span>
+          </div>
           <button
             onClick={handleLogout}
             className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
@@ -346,5 +352,18 @@ export default function MyPage() {
         />
       )}
     </div>
+  );
+}
+
+// Suspense로 감싸서 export (useSearchParams 사용 시 필요)
+export default function MyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+      </div>
+    }>
+      <MyPageContent />
+    </Suspense>
   );
 }

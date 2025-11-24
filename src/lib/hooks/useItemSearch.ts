@@ -37,7 +37,12 @@ export function useItemSearch() {
         tags: debouncedTags.length > 0 ? debouncedTags : undefined,
       });
 
-      setItems(data);
+      // 최신순 정렬 (registered_at 내림차순)
+      const sortedData = [...data].sort((a, b) =>
+        new Date(b.registered_at).getTime() - new Date(a.registered_at).getTime()
+      );
+
+      setItems(sortedData);
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch items';

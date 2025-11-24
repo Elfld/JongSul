@@ -9,6 +9,7 @@ import ItemCard from '@/components/ItemCard';
 import ItemModal from '@/components/ItemModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useItemSearch } from '@/lib/hooks/useItemSearch';
+import { useMyReservedIds } from '@/lib/hooks/useMyReservedIds';
 import { ItemResponse, TagResponse } from '@/lib/types/lostItem';
 import { TagService } from '@/lib/api/tags';
 
@@ -30,6 +31,9 @@ function HomeContent() {
   // 태그 목록 (API에서 로드)
   const [availableTags, setAvailableTags] = useState<TagResponse[]>([]);
   const [tagsLoading, setTagsLoading] = useState(true);
+
+  // 내 예약 아이템 ID 목록 (훅으로 분리)
+  const myReservedIds = useMyReservedIds();
 
   // 검색 & 필터링 상태 관리 (Custom Hook)
   const {
@@ -101,7 +105,12 @@ function HomeContent() {
       <main className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item) => (
-            <ItemCard key={item.id} item={item} onClick={() => openModal(item)} />
+            <ItemCard
+              key={item.id}
+              item={item}
+              isMyReservation={myReservedIds.includes(item.id)}
+              onClick={() => openModal(item)}
+            />
           ))}
         </div>
 
@@ -121,7 +130,13 @@ function HomeContent() {
       </main>
 
       {/* 아이템 상세 모달 */}
-      {selectedItem && <ItemModal item={selectedItem} onClose={closeModal} />}
+      {selectedItem && (
+        <ItemModal
+          item={selectedItem}
+          isMyReservation={myReservedIds.includes(selectedItem.id)}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }

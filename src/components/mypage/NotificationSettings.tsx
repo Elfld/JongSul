@@ -107,12 +107,15 @@ export default function NotificationSettings() {
       {/* 안내 문구 */}
       <div className="bg-sky-50 rounded-xl p-4 mb-6">
         <p className="text-sm text-gray-700">
-          선택한 카테고리의 분실물이 등록되면 알림을 받을 수 있습니다.
+          관심 있는 카테고리를 선택하여 저장해두세요.
         </p>
         <p className="text-xs text-gray-500 mt-1">
           {selectedCategories.length > 0
             ? `${selectedCategories.length}개 카테고리 선택됨`
             : '카테고리를 선택해주세요'}
+        </p>
+        <p className="text-xs text-amber-600 mt-2">
+          ※ 알림 기능은 현재 준비 중입니다
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { X, MapPin, Calendar, Key, Clock, CheckCircle, AlertCircle, Package, Loader2 } from 'lucide-react';
 import { ClaimedItem } from './ClaimedItemCard';
@@ -56,6 +56,25 @@ export default function MyPageItemDetailModal({
       onCancelReservation();
     }
   };
+
+  // ESC 키로 닫기
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // body 스크롤 방지
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   return (
     <div

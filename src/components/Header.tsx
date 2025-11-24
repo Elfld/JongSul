@@ -16,35 +16,52 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const { isAuthenticated } = useAuth();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const expandedSearchRef = useRef<HTMLDivElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
 
-  // 검색바 크기 감지 - 너무 작아지면 compact 모드로 전환
-  const checkSearchBarWidth = useCallback(() => {
+  // compact 상태 변경 시 애니메이션 동안 측정 방지
+  const setCompactWithLock = useCallback((value: boolean) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setIsCompact(value);
+    setTimeout(() => setIsTransitioning(false), 350);
+  }, [isTransitioning]);
+
+  // 검색바 크기 감지를 ref로 관리 (useEffect 재실행 방지)
+  const checkSearchBarWidthRef = useRef<() => void>(() => {});
+
+  // 실제 크기 감지 로직
+  checkSearchBarWidthRef.current = () => {
+    if (isTransitioning) return;
+
     if (searchBarRef.current && !isCompact) {
       const width = searchBarRef.current.offsetWidth;
-      if (width < 150) {
-        setIsCompact(true);
+      if (width < 180) {
+        setCompactWithLock(true);
       }
     }
 
-    // compact 모드일 때는 가용 공간으로 판단
     if (isCompact) {
       const headerWidth = window.innerWidth;
-      // 제목(~130px) + 버튼2개(~100px) + 패딩(48px) + gap(32px) = ~310px
-      const availableWidth = headerWidth - 310;
-      if (availableWidth >= 200) {
-        setIsCompact(false);
+      const availableWidth = headerWidth - 350;
+      if (availableWidth >= 250) {
+        setCompactWithLock(false);
       }
     }
-  }, [isCompact]);
+  };
 
+  // resize 이벤트에서만 호출 (마운트 시 1회 + resize 시)
   useEffect(() => {
-    checkSearchBarWidth();
-    window.addEventListener('resize', checkSearchBarWidth);
-    return () => window.removeEventListener('resize', checkSearchBarWidth);
-  }, [checkSearchBarWidth]);
+    const handleResize = () => checkSearchBarWidthRef.current();
+
+    // 초기 체크 (마운트 시 1회만)
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // 빈 의존성 - 마운트 시 1회만 실행
 
   // 확장된 검색창 외부 클릭 감지
   useEffect(() => {
@@ -85,31 +102,32 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
     <header className="bg-gradient-to-b from-sky-50 to-white border-b border-sky-100 px-6 py-4 flex items-center justify-between relative">
       <h1 className="text-2xl font-bold text-sky-600 whitespace-nowrap">분실물 찾기</h1>
 
-      <div className="flex items-center gap-4 min-w-0 flex-1 justify-end">
-        {/* 검색바 - 반응형으로 줄어들다가 compact 모드로 전환 */}
-        {!isCompact ? (
-          <div
-            ref={searchBarRef}
-            className="relative w-96 shrink min-w-[120px] transition-all duration-300 ease-out"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="물품 유형이나 위치를 검색하세요"
-              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white border-2 border-sky-200 shadow-sm focus:outline-none focus:border-sky-400 transition-all"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-sky-400" />
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsSearchExpanded(true)}
-            className="flex-shrink-0 w-11 h-11 rounded-full bg-white border-2 border-sky-200 flex items-center justify-center shadow-sm hover:border-sky-400 hover:shadow-md transition-all duration-300 ease-out"
-            aria-label="검색"
-          >
-            <Search className="w-5 h-5 text-sky-400" />
-          </button>
-        )}
+      <div className="flex items-center gap-4 min-w-0 flex-1 justify-end ml-8">
+        {/* 검색바 - compact 모드에서 버튼처럼 축소 (단일 요소로 애니메이션) */}
+        <div
+          ref={searchBarRef}
+          onClick={isCompact ? () => setIsSearchExpanded(true) : undefined}
+          className={`relative bg-white border-2 border-sky-200 shadow-sm transition-all duration-300 ease-out focus-within:border-sky-400
+            ${isCompact
+              ? 'w-11 h-11 rounded-full cursor-pointer hover:border-sky-400 hover:shadow-md flex-shrink-0'
+              : 'w-96 shrink min-w-[120px] rounded-full'
+            }`}
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="물품 유형이나 위치를 검색하세요"
+            className={`w-full bg-transparent focus:outline-none transition-all duration-300
+              ${isCompact
+                ? 'opacity-0 pointer-events-none h-0 p-0'
+                : 'opacity-100 pl-10 pr-4 py-2.5'
+              }`}
+          />
+          <Search className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 text-sky-400 transition-all duration-300
+            ${isCompact ? 'left-1/2 -translate-x-1/2' : 'left-3'}`}
+          />
+        </div>
 
         <button
           onClick={() => router.push(isAuthenticated ? '/mypage' : '/login')}

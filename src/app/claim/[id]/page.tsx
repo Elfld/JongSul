@@ -122,14 +122,8 @@ export default function ClaimPage() {
           return;
         }
 
-        // 400: 상세 에러 메시지 표시
-        if (response.status === 400) {
-          const detailMessage = errorData.detail || errorData.error || '잘못된 요청입니다.';
-          throw new Error(detailMessage);
-        }
-
-        // 기타 에러 표시
-        throw new Error(errorData.error || errorData.detail || '소유권 주장에 실패했습니다.');
+        // 에러 메시지 표시 (API route에서 한글로 반환)
+        throw new Error(errorData.error || '소유권 주장에 실패했습니다.');
       }
 
       const data: ClaimResponse = await response.json();
@@ -260,7 +254,7 @@ export default function ClaimPage() {
           error={claimError}
         />
       ) : (
-        claimCode && <ClaimCodeDisplay code={claimCode} expiresAt={expiresAt} />
+        claimCode && <ClaimCodeDisplay code={claimCode} expiresAt={expiresAt} location={item?.location} />
       )}
     </div>
   );
