@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 interface ClaimCodeDisplayProps {
   code: string;
   expiresAt: string;
+  location?: string | null;
 }
 
 /**
@@ -16,7 +17,7 @@ interface ClaimCodeDisplayProps {
  * - 유효기간 표시
  * - 홈으로 돌아가기
  */
-export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayProps) {
+export default function ClaimCodeDisplay({ code, expiresAt, location }: ClaimCodeDisplayProps) {
   const router = useRouter();
 
   const handleGoHome = () => {
@@ -78,7 +79,7 @@ export default function ClaimCodeDisplay({ code, expiresAt }: ClaimCodeDisplayPr
       <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left">
         <h3 className="font-semibold text-gray-800 mb-3">수령 방법</h3>
         <ol className="space-y-2 text-sm text-gray-700">
-          <li>1. 학생회관 1층 분실물 보관함으로 방문</li>
+          <li>1. <strong>{location || '분실물 보관 장소'}</strong>로 방문</li>
           <li>2. 키오스크에서 수령 코드 입력</li>
           <li>3. 신분증 확인 후 분실물 수령</li>
         </ol>

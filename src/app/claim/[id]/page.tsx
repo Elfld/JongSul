@@ -254,7 +254,7 @@ export default function ClaimPage() {
           error={claimError}
         />
       ) : (
-        claimCode && <ClaimCodeDisplay code={claimCode} expiresAt={expiresAt} />
+        claimCode && <ClaimCodeDisplay code={claimCode} expiresAt={expiresAt} location={item?.location} />
       )}
     </div>
   );
