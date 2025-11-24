@@ -16,35 +16,52 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const { isAuthenticated } = useAuth();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const expandedSearchRef = useRef<HTMLDivElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
 
-  // 검색바 크기 감지 - 너무 작아지면 compact 모드로 전환
-  const checkSearchBarWidth = useCallback(() => {
+  // compact 상태 변경 시 애니메이션 동안 측정 방지
+  const setCompactWithLock = useCallback((value: boolean) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setIsCompact(value);
+    setTimeout(() => setIsTransitioning(false), 350);
+  }, [isTransitioning]);
+
+  // 검색바 크기 감지를 ref로 관리 (useEffect 재실행 방지)
+  const checkSearchBarWidthRef = useRef<() => void>(() => {});
+
+  // 실제 크기 감지 로직
+  checkSearchBarWidthRef.current = () => {
+    if (isTransitioning) return;
+
     if (searchBarRef.current && !isCompact) {
       const width = searchBarRef.current.offsetWidth;
       if (width < 180) {
-        setIsCompact(true);
+        setCompactWithLock(true);
       }
     }
 
-    // compact 모드일 때는 가용 공간으로 판단
     if (isCompact) {
       const headerWidth = window.innerWidth;
-      // 제목(~130px) + 버튼2개(~100px) + 패딩(48px) + gap(32px) + 여유공간(40px) = ~350px
       const availableWidth = headerWidth - 350;
-      if (availableWidth >= 220) {
-        setIsCompact(false);
+      if (availableWidth >= 250) {
+        setCompactWithLock(false);
       }
     }
-  }, [isCompact]);
+  };
 
+  // resize 이벤트에서만 호출 (마운트 시 1회 + resize 시)
   useEffect(() => {
-    checkSearchBarWidth();
-    window.addEventListener('resize', checkSearchBarWidth);
-    return () => window.removeEventListener('resize', checkSearchBarWidth);
-  }, [checkSearchBarWidth]);
+    const handleResize = () => checkSearchBarWidthRef.current();
+
+    // 초기 체크 (마운트 시 1회만)
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // 빈 의존성 - 마운트 시 1회만 실행
 
   // 확장된 검색창 외부 클릭 감지
   useEffect(() => {
