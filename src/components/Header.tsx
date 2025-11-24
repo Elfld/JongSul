@@ -107,7 +107,7 @@ export default function Header({ searchQuery, onSearchChange }: HeaderProps) {
         <div
           ref={searchBarRef}
           onClick={isCompact ? () => setIsSearchExpanded(true) : undefined}
-          className={`relative bg-white border-2 border-sky-200 shadow-sm transition-all duration-300 ease-out
+          className={`relative bg-white border-2 border-sky-200 shadow-sm transition-all duration-300 ease-out focus-within:border-sky-400
             ${isCompact
               ? 'w-11 h-11 rounded-full cursor-pointer hover:border-sky-400 hover:shadow-md flex-shrink-0'
               : 'w-96 shrink min-w-[120px] rounded-full'
