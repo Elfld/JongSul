@@ -80,6 +80,7 @@ export default function RegisterPage() {
           setIsEmailVerified(true);
           setError('');
         } else {
+          console.log('[인증 에러 응답]', data);
           setError(data.error || '인증번호가 올바르지 않습니다.');
           // 인증번호만 초기화
           setVerificationCode('');
@@ -162,7 +163,9 @@ export default function RegisterPage() {
           {/* 에러 메시지 */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-700 text-sm">{error}</p>
+              <p className="text-red-700 text-sm">
+                {typeof error === 'string' ? error : '오류가 발생했습니다. 다시 시도해주세요.'}
+              </p>
             </div>
           )}
 
