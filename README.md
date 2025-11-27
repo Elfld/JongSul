@@ -397,5 +397,5 @@ chore: 빌드 설정, 패키지 관리
 
 ---
 
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-27
 **Version**: 1.0.0
