@@ -82,7 +82,7 @@ export default function MyPageItemDetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-3xl md:rounded-3xl w-full md:max-w-6xl max-h-[85vh] md:max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
+        className="bg-white w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col md:flex-row rounded-t-3xl md:rounded-3xl md:max-w-6xl animate-in slide-in-from-bottom md:slide-in-from-bottom-0 md:zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 왼쪽: 이미지 영역 */}
