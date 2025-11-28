@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Loader2, ArrowLeft, Phone } from 'lucide-react';
+import { Mail, Lock, User, Loader2, ArrowLeft, Phone, Info } from 'lucide-react';
 import Link from 'next/link';
 
 /**
@@ -10,16 +10,19 @@ import Link from 'next/link';
  *
  * 플로우:
  * 1. 이메일 입력 → 인증요청 → 인증번호 발송
- * 2. 인증번호 입력 → 자동 검증 → 토큰 발급
+ * 2. 인증번호 입력 → 확인 버튼 → 토큰 발급
  * 3. 나머지 정보 입력 → 회원가입
  */
 export default function RegisterPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [previousEmail, setPreviousEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationToken, setVerificationToken] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [emailVerificationRequested, setEmailVerificationRequested] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(300);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [name, setName] = useState('');
@@ -28,6 +31,30 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [verifyingEmail, setVerifyingEmail] = useState(false);
+
+  // 타이머 카운트다운
+  useEffect(() => {
+    if (emailVerificationRequested && remainingTime > 0 && !isEmailVerified) {
+      const timer = setInterval(() => {
+        setRemainingTime((prev) => Math.max(0, prev - 1));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [emailVerificationRequested, remainingTime, isEmailVerified]);
+
+  // 이메일 변경 감지
+  useEffect(() => {
+    if (email !== previousEmail && emailVerificationRequested) {
+      setEmailVerificationRequested(false);
+    }
+  }, [email, previousEmail, emailVerificationRequested]);
+
+  // 시간 포맷팅 (MM:SS)
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // 인증번호 발송
   const handleRequestVerification = async () => {
@@ -44,7 +71,10 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('인증번호를 발송했습니다. 이메일을 확인해주세요.');
+        setEmailVerificationRequested(true);
+        setPreviousEmail(email);
+        setRemainingTime(300);
+        setVerificationCode('');
       } else {
         setError(data.error || '인증번호 발송에 실패했습니다.');
       }
@@ -55,44 +85,47 @@ export default function RegisterPage() {
     }
   };
 
-  // 인증번호 6자리 입력 시 자동 검증
-  const handleVerificationCodeChange = async (code: string) => {
-    // 숫자만 허용, 최대 6자리
+  // 인증번호 입력 (숫자만, 6자리)
+  const handleVerificationCodeChange = (code: string) => {
     const numericCode = code.replace(/\D/g, '').slice(0, 6);
     setVerificationCode(numericCode);
+  };
 
-    // 6자리가 되면 자동으로 검증
-    if (numericCode.length === 6) {
-      setError('');
-      setVerifyingEmail(true);
+  // 인증번호 검증 (확인 버튼)
+  const handleVerifyCode = async () => {
+    if (verificationCode.length !== 6) {
+      setError('인증번호 6자리를 모두 입력해주세요.');
+      return;
+    }
 
-      try {
-        const response = await fetch('/api/users/email/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code: numericCode }),
-        });
+    setError('');
+    setVerifyingEmail(true);
 
-        const data = await response.json();
+    try {
+      const response = await fetch('/api/users/email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: verificationCode }),
+      });
 
-        if (response.ok) {
-          setVerificationToken(data.verification_token);
-          setIsEmailVerified(true);
-          setError('');
-        } else {
-          console.log('[인증 에러 응답]', data);
-          setError(data.error || '인증번호가 올바르지 않습니다.');
-          // 인증번호만 초기화
-          setVerificationCode('');
-          setIsEmailVerified(false);
-        }
-      } catch {
-        setError('네트워크 오류가 발생했습니다.');
+      const data = await response.json();
+
+      if (response.ok) {
+        setVerificationToken(data.verification_token);
+        setIsEmailVerified(true);
+        setError('');
+      } else {
+        console.log('[인증 에러 응답]', data);
+        setError(data.error || '인증번호가 올바르지 않습니다.');
         setVerificationCode('');
         setIsEmailVerified(false);
-      } finally {
-        setVerifyingEmail(false);
       }
+    } catch {
+      setError('네트워크 오류가 발생했습니다.');
+      setVerificationCode('');
+      setIsEmailVerified(false);
+    } finally {
+      setVerifyingEmail(false);
     }
   };
 
@@ -171,7 +204,7 @@ export default function RegisterPage() {
 
           {/* 회원가입 폼 */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* 이메일 입력란 + 인증요청 버튼 */}
+            {/* 이메일 입력란 + 인증요청/재발송 버튼 */}
             <div>
               <label htmlFor="email" className="sr-only">
                 이메일 주소
@@ -196,36 +229,62 @@ export default function RegisterPage() {
                   disabled={!email || verifyingEmail || isEmailVerified}
                   className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  {isEmailVerified ? '✓ 완료' : '인증요청'}
+                  {isEmailVerified
+                    ? '✓ 완료'
+                    : emailVerificationRequested
+                    ? '재발송'
+                    : '인증요청'}
                 </button>
               </div>
+
+              {/* 인증번호 발송 안내 */}
+              {emailVerificationRequested && remainingTime > 0 && !isEmailVerified && (
+                <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
+                  <Info className="w-4 h-4" />
+                  <span>인증번호를 발송했습니다. {formatTime(remainingTime)}</span>
+                </div>
+              )}
             </div>
 
-            {/* 인증번호 입력란 */}
+            {/* 인증번호 입력란 + 확인 버튼 */}
             <div>
               <label htmlFor="verificationCode" className="sr-only">
                 인증번호
               </label>
-              <div className="flex items-center border-b border-gray-300 pb-2">
-                <input
-                  id="verificationCode"
-                  type="text"
-                  inputMode="numeric"
-                  value={verificationCode}
-                  onChange={(e) => handleVerificationCodeChange(e.target.value)}
-                  placeholder="인증번호(6자리)"
-                  maxLength={6}
-                  disabled={isEmailVerified}
-                  className="flex-1 outline-none text-gray-700 placeholder-gray-400 disabled:opacity-50"
-                />
-                {verifyingEmail && verificationCode.length === 6 && (
-                  <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />
-                )}
-                {isEmailVerified && (
-                  <span className="text-green-600 text-sm font-medium">
-                    ✓ 인증완료
-                  </span>
-                )}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center border-b border-gray-300 pb-2">
+                  <input
+                    id="verificationCode"
+                    type="text"
+                    inputMode="numeric"
+                    value={verificationCode}
+                    onChange={(e) => handleVerificationCodeChange(e.target.value)}
+                    placeholder="인증번호(6자리)"
+                    maxLength={6}
+                    disabled={!emailVerificationRequested || isEmailVerified}
+                    className="flex-1 outline-none text-gray-700 placeholder-gray-400 disabled:opacity-50"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleVerifyCode}
+                  disabled={!emailVerificationRequested || verificationCode.length !== 6 || verifyingEmail || isEmailVerified}
+                  className={`px-4 py-2 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                    emailVerificationRequested && !isEmailVerified
+                      ? 'bg-sky-500 hover:bg-sky-600'
+                      : 'bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {verifyingEmail ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin inline" />
+                    </>
+                  ) : isEmailVerified ? (
+                    '✓ 완료'
+                  ) : (
+                    '확인'
+                  )}
+                </button>
               </div>
             </div>
 
