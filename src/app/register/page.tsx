@@ -21,8 +21,7 @@ export default function RegisterPage() {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationToken, setVerificationToken] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [emailVerificationRequested, setEmailVerificationRequested] = useState(false);
-  const [remainingTime, setRemainingTime] = useState(300);
+  const [remainingTime, setRemainingTime] = useState(0);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [name, setName] = useState('');
@@ -34,20 +33,13 @@ export default function RegisterPage() {
 
   // 타이머 카운트다운
   useEffect(() => {
-    if (emailVerificationRequested && remainingTime > 0 && !isEmailVerified) {
+    if (remainingTime > 0 && !isEmailVerified) {
       const timer = setInterval(() => {
         setRemainingTime((prev) => Math.max(0, prev - 1));
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [emailVerificationRequested, remainingTime, isEmailVerified]);
-
-  // 이메일 변경 감지
-  useEffect(() => {
-    if (email !== previousEmail && emailVerificationRequested) {
-      setEmailVerificationRequested(false);
-    }
-  }, [email, previousEmail, emailVerificationRequested]);
+  }, [remainingTime, isEmailVerified]);
 
   // 시간 포맷팅 (MM:SS)
   const formatTime = (seconds: number) => {
@@ -71,7 +63,6 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setEmailVerificationRequested(true);
         setPreviousEmail(email);
         setRemainingTime(300);
         setVerificationCode('');
@@ -85,16 +76,15 @@ export default function RegisterPage() {
     }
   };
 
-  // 인증번호 입력 (숫자만, 6자리)
+  // 인증번호 입력
   const handleVerificationCodeChange = (code: string) => {
-    const numericCode = code.replace(/\D/g, '').slice(0, 6);
-    setVerificationCode(numericCode);
+    setVerificationCode(code);
   };
 
   // 인증번호 검증 (확인 버튼)
   const handleVerifyCode = async () => {
-    if (verificationCode.length !== 6) {
-      setError('인증번호 6자리를 모두 입력해주세요.');
+    if (verificationCode.length === 0) {
+      setError('인증번호를 입력해주세요.');
       return;
     }
 
@@ -231,14 +221,14 @@ export default function RegisterPage() {
                 >
                   {isEmailVerified
                     ? '✓ 완료'
-                    : emailVerificationRequested
+                    : previousEmail === email && remainingTime > 0
                     ? '재발송'
                     : '인증요청'}
                 </button>
               </div>
 
               {/* 인증번호 발송 안내 */}
-              {emailVerificationRequested && remainingTime > 0 && !isEmailVerified && (
+              {remainingTime > 0 && !isEmailVerified && (
                 <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
                   <Info className="w-4 h-4" />
                   <span>인증번호를 발송했습니다. {formatTime(remainingTime)}</span>
@@ -259,18 +249,17 @@ export default function RegisterPage() {
                     inputMode="numeric"
                     value={verificationCode}
                     onChange={(e) => handleVerificationCodeChange(e.target.value)}
-                    placeholder="인증번호(6자리)"
-                    maxLength={6}
-                    disabled={!emailVerificationRequested || isEmailVerified}
+                    placeholder="인증번호"
+                    disabled={!(previousEmail === email && remainingTime > 0) || isEmailVerified}
                     className="flex-1 outline-none text-gray-700 placeholder-gray-400 disabled:opacity-50"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleVerifyCode}
-                  disabled={!emailVerificationRequested || verificationCode.length !== 6 || verifyingEmail || isEmailVerified}
+                  disabled={!(previousEmail === email && remainingTime > 0) || verificationCode.length === 0 || verifyingEmail || isEmailVerified}
                   className={`px-4 py-2 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                    emailVerificationRequested && !isEmailVerified
+                    previousEmail === email && remainingTime > 0 && !isEmailVerified
                       ? 'bg-sky-500 hover:bg-sky-600'
                       : 'bg-gray-300'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}

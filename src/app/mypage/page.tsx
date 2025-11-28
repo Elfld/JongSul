@@ -9,6 +9,7 @@ import NotificationSettings from '@/components/mypage/NotificationSettings';
 import ClaimedItemCard, { ClaimedItem } from '@/components/mypage/ClaimedItemCard';
 import MyPageItemDetailModal from '@/components/mypage/MyPageItemDetailModal';
 import CancelReservationModal from '@/components/mypage/CancelReservationModal';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 /**
  * 마이페이지
@@ -38,6 +39,12 @@ function MyPageContent() {
   const [selectedDetailData, setSelectedDetailData] = useState<MyItemDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // 알림 다이얼로그 상태
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: '',
+  });
 
   const isLoggingOut = useRef(false);
 
@@ -158,7 +165,7 @@ function MyPageContent() {
 
     const token = localStorage.getItem('access_token');
     if (!token) {
-      alert('로그인이 필요합니다.');
+      setAlertDialog({ isOpen: true, message: '로그인이 필요합니다.' });
       router.push('/login?redirect=/mypage');
       return;
     }
@@ -186,13 +193,13 @@ function MyPageContent() {
 
         // 403: 권한 없음
         if (response.status === 403) {
-          alert('이 예약을 취소할 권한이 없습니다.');
+          setAlertDialog({ isOpen: true, message: '이 예약을 취소할 권한이 없습니다.' });
           return;
         }
 
         // 404: 예약 없음
         if (response.status === 404) {
-          alert('예약을 찾을 수 없습니다.');
+          setAlertDialog({ isOpen: true, message: '예약을 찾을 수 없습니다.' });
           return;
         }
 
@@ -202,14 +209,17 @@ function MyPageContent() {
       // 성공 시 목록에서 제거
       setClaimedItems(prev => prev.filter(item => item.id !== selectedItem.id));
 
-      alert(`예약이 취소되었습니다.\n사유: ${reason}`);
+      setAlertDialog({ isOpen: true, message: `예약이 취소되었습니다.\n사유: ${reason}` });
 
       // 모든 모달 닫기 (URL 기반이므로 뒤로가기)
       setShowCancelModal(false);
       router.back();
 
     } catch (err) {
-      alert(err instanceof Error ? err.message : '오류가 발생했습니다.');
+      setAlertDialog({
+        isOpen: true,
+        message: err instanceof Error ? err.message : '오류가 발생했습니다.'
+      });
     }
   };
 
@@ -351,6 +361,13 @@ function MyPageContent() {
           onConfirm={handleConfirmCancel}
         />
       )}
+
+      {/* 알림 다이얼로그 */}
+      <ConfirmDialog
+        isOpen={alertDialog.isOpen}
+        message={alertDialog.message}
+        onConfirm={() => setAlertDialog({ isOpen: false, message: '' })}
+      />
     </div>
   );
 }

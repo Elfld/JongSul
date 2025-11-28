@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface CancelReservationModalProps {
   onClose: () => void;
@@ -21,6 +22,10 @@ export default function CancelReservationModal({
 }: CancelReservationModalProps) {
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [customReason, setCustomReason] = useState<string>('');
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: '',
+  });
 
   const reasons = [
     '내 것이 아님',
@@ -30,14 +35,14 @@ export default function CancelReservationModal({
 
   const handleConfirm = () => {
     if (!selectedReason) {
-      alert('취소 사유를 선택해주세요.');
+      setAlertDialog({ isOpen: true, message: '취소 사유를 선택해주세요.' });
       return;
     }
 
     // "기타" 선택 시 커스텀 사유 검증
     if (selectedReason === '기타') {
       if (!customReason.trim()) {
-        alert('취소 사유를 입력해주세요.');
+        setAlertDialog({ isOpen: true, message: '취소 사유를 입력해주세요.' });
         return;
       }
       onConfirm(customReason.trim());
@@ -135,6 +140,13 @@ export default function CancelReservationModal({
           </button>
         </div>
       </div>
+
+      {/* 알림 다이얼로그 */}
+      <ConfirmDialog
+        isOpen={alertDialog.isOpen}
+        message={alertDialog.message}
+        onConfirm={() => setAlertDialog({ isOpen: false, message: '' })}
+      />
     </div>
   );
 }

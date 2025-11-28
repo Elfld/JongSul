@@ -15,8 +15,8 @@ interface ConfirmDialogProps {
   cancelText?: string;
   /** 확인 버튼 클릭 핸들러 */
   onConfirm: () => void;
-  /** 취소 버튼 클릭 핸들러 */
-  onCancel: () => void;
+  /** 취소 버튼 클릭 핸들러 (없으면 취소 버튼 숨김) */
+  onCancel?: () => void;
 }
 
 /**
@@ -50,7 +50,7 @@ export default function ConfirmDialog({
       {/* 반투명 배경 */}
       <div
         className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-        onClick={onCancel}
+        onClick={onCancel || undefined}
       />
 
       {/* 다이얼로그 카드 */}
@@ -79,15 +79,17 @@ export default function ConfirmDialog({
 
         {/* 버튼 그룹 */}
         <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-          >
-            {cancelText}
-          </button>
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+            >
+              {cancelText}
+            </button>
+          )}
           <button
             onClick={onConfirm}
-            className="flex-1 py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-lg transition-colors"
+            className={`${onCancel ? 'flex-1' : 'w-full'} py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-lg transition-colors`}
           >
             {confirmText}
           </button>
