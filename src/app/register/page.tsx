@@ -48,7 +48,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || '인증번호 발송에 실패했습니다.');
       }
-    } catch (err) {
+    } catch {
       setError('네트워크 오류가 발생했습니다.');
     } finally {
       setVerifyingEmail(false);
@@ -86,7 +86,7 @@ export default function RegisterPage() {
           setVerificationCode('');
           setIsEmailVerified(false);
         }
-      } catch (err) {
+      } catch {
         setError('네트워크 오류가 발생했습니다.');
         setVerificationCode('');
         setIsEmailVerified(false);
@@ -135,7 +135,7 @@ export default function RegisterPage() {
       } else {
         setError(data.error || '회원가입에 실패했습니다.');
       }
-    } catch (err) {
+    } catch {
       setError('네트워크 오류가 발생했습니다.');
     } finally {
       setLoading(false);

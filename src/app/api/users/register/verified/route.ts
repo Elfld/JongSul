@@ -3,13 +3,28 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * 백엔드 에러 응답을 문자열로 변환
  */
-function formatBackendError(errorData: any, fallback: string): string {
-  if (typeof errorData?.error === 'string') {
+function formatBackendError(errorData: unknown, fallback: string): string {
+  if (
+    errorData &&
+    typeof errorData === 'object' &&
+    'error' in errorData &&
+    typeof errorData.error === 'string'
+  ) {
     return errorData.error;
   }
-  if (Array.isArray(errorData?.error)) {
+  if (
+    errorData &&
+    typeof errorData === 'object' &&
+    'error' in errorData &&
+    Array.isArray(errorData.error)
+  ) {
     const messages = errorData.error
-      .map((e: any) => e.msg || '')
+      .map((e: unknown) => {
+        if (e && typeof e === 'object' && 'msg' in e && typeof e.msg === 'string') {
+          return e.msg;
+        }
+        return '';
+      })
       .filter((msg: string) => msg.length > 0);
     return messages.length > 0 ? messages.join(', ') : fallback;
   }

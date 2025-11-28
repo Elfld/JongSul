@@ -7,16 +7,31 @@ import { NextRequest, NextResponse } from 'next/server';
  * - 400: { error: "문자열" }
  * - 422: { error: [{ msg, type, loc, ... }] }
  */
-function formatBackendError(errorData: any, fallback: string): string {
+function formatBackendError(errorData: unknown, fallback: string): string {
   // error 필드가 문자열
-  if (typeof errorData?.error === 'string') {
+  if (
+    errorData &&
+    typeof errorData === 'object' &&
+    'error' in errorData &&
+    typeof errorData.error === 'string'
+  ) {
     return errorData.error;
   }
 
   // error 필드가 배열 (422 validation error)
-  if (Array.isArray(errorData?.error)) {
+  if (
+    errorData &&
+    typeof errorData === 'object' &&
+    'error' in errorData &&
+    Array.isArray(errorData.error)
+  ) {
     const messages = errorData.error
-      .map((e: any) => e.msg || '')
+      .map((e: unknown) => {
+        if (e && typeof e === 'object' && 'msg' in e && typeof e.msg === 'string') {
+          return e.msg;
+        }
+        return '';
+      })
       .filter((msg: string) => msg.length > 0);
     return messages.length > 0 ? messages.join(', ') : fallback;
   }
