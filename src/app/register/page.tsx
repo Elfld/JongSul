@@ -177,7 +177,7 @@ export default function RegisterPage() {
       </Link>
 
       <div className="w-full max-w-md">
-        <div className="bg-white shadow-lg rounded-lg p-8">
+        <div className="bg-white shadow-lg rounded-lg p-4 sm:p-8">
           {/* 제목 */}
           <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
             회원가입
@@ -199,7 +199,7 @@ export default function RegisterPage() {
               <label htmlFor="email" className="sr-only">
                 이메일 주소
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="flex-1 flex items-center border-b border-gray-300 pb-2">
                   <Mail className="w-5 h-5 text-gray-400 mr-3" />
                   <input
@@ -217,7 +217,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={handleRequestVerification}
                   disabled={!email || verifyingEmail || isEmailVerified}
-                  className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   {isEmailVerified
                     ? '✓ 완료'
@@ -241,7 +241,7 @@ export default function RegisterPage() {
               <label htmlFor="verificationCode" className="sr-only">
                 인증번호
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="flex-1 flex items-center border-b border-gray-300 pb-2">
                   <input
                     id="verificationCode"
@@ -258,7 +258,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={handleVerifyCode}
                   disabled={!(previousEmail === email && remainingTime > 0) || verificationCode.length === 0 || verifyingEmail || isEmailVerified}
-                  className={`px-4 py-2 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
+                  className={`w-full sm:w-auto px-4 py-2.5 sm:py-2 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                     previousEmail === email && remainingTime > 0 && !isEmailVerified
                       ? 'bg-sky-500 hover:bg-sky-600'
                       : 'bg-gray-300'
