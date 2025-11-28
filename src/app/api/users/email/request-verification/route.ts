@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
+ * 백엔드 에러 응답을 문자열로 변환
+ */
+function formatBackendError(errorData: any, fallback: string): string {
+  if (typeof errorData?.error === 'string') {
+    return errorData.error;
+  }
+  if (Array.isArray(errorData?.error)) {
+    const messages = errorData.error
+      .map((e: any) => e.msg || '')
+      .filter((msg: string) => msg.length > 0);
+    return messages.length > 0 ? messages.join(', ') : fallback;
+  }
+  return fallback;
+}
+
+/**
  * 이메일 인증번호 발송 API 프록시
  *
  * OpenAPI 명세:
@@ -15,6 +31,7 @@ import { NextRequest, NextResponse } from 'next/server';
  *
  * 에러 처리:
  * - 400 Bad Request: 이미 가입된 이메일
+ * - 422 Validation Error: 입력값 형식 오류
  * - 500 Internal Server Error: 이메일 발송 실패
  */
 export async function POST(request: NextRequest) {
@@ -59,27 +76,13 @@ export async function POST(request: NextRequest) {
         error: errorData,
       });
 
-      // 4-1. 400 Bad Request: 이미 가입된 이메일
-      if (response.status === 400) {
-        return NextResponse.json(
-          { error: errorData.detail || '이미 가입된 이메일입니다.' },
-          { status: 400 }
-        );
-      }
-
-      // 4-2. 500 Internal Server Error: 이메일 발송 실패
-      if (response.status === 500) {
-        return NextResponse.json(
-          { error: '이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.' },
-          { status: 500 }
-        );
-      }
-
-      // 4-3. 기타 에러
-      return NextResponse.json(
-        { error: errorData.detail || '인증번호 발송에 실패했습니다.' },
-        { status: response.status }
+      // 4-1. 에러 메시지 변환
+      const errorMessage = formatBackendError(
+        errorData,
+        '인증번호 발송에 실패했습니다.'
       );
+
+      return NextResponse.json({ error: errorMessage }, { status: response.status });
     }
 
     // 5. 성공 응답
