@@ -104,9 +104,9 @@ export default function ItemModal({ item, isMyReservation, onClose }: ItemModalP
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===== 모바일 레이아웃 ===== */}
-        <div className="md:hidden flex flex-col h-full">
+        <div className="md:hidden flex flex-col h-full overflow-hidden">
           {/* 이미지 영역 */}
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0">
+          <div className="relative aspect-[4/3] max-h-[40vh] bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center flex-shrink-0">
             {item.photo_url && !imageError ? (
               <Image
                 src={item.photo_url}
@@ -127,7 +127,7 @@ export default function ItemModal({ item, isMyReservation, onClose }: ItemModalP
           </div>
 
           {/* 정보 영역 */}
-          <div className="flex-1 p-5 overflow-y-auto flex flex-col">
+          <div className="flex-1 p-5 overflow-y-auto flex flex-col min-h-0">
             {/* 태그 */}
             <div className="flex flex-wrap gap-2 mb-4">
               {item.tags.map((tag) => (
