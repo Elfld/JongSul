@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface ClaimAgreementProps {
   onAgree: () => void;
@@ -25,10 +26,11 @@ export default function ClaimAgreement({
   error = null,
 }: ClaimAgreementProps) {
   const [isChecked, setIsChecked] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleAgree = () => {
     if (!isChecked) {
-      alert('서약서에 동의해주세요.');
+      setShowAlert(true);
       return;
     }
     onAgree();
@@ -118,6 +120,13 @@ export default function ClaimAgreement({
           )}
         </button>
       </div>
+
+      {/* 알림 다이얼로그 */}
+      <ConfirmDialog
+        isOpen={showAlert}
+        message="서약서에 동의해주세요."
+        onConfirm={() => setShowAlert(false)}
+      />
     </div>
   );
 }
