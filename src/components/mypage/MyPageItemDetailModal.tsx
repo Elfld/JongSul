@@ -78,11 +78,11 @@ export default function MyPageItemDetailModal({
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-end md:items-center justify-center z-50 md:p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
+        className="bg-white rounded-t-3xl md:rounded-3xl w-full md:max-w-6xl max-h-[85vh] md:max-h-[90vh] overflow-hidden flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 왼쪽: 이미지 영역 */}

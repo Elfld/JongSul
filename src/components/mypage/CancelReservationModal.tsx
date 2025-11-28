@@ -53,11 +53,11 @@ export default function CancelReservationModal({
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-end md:items-center justify-center z-[60] md:p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl"
+        className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-md p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
