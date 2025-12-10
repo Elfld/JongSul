@@ -1,17 +1,17 @@
-# 📋 코드 정리 계획서 (발표/제출용)
+# 📋 코드 정리 계획서 (제출용)
 
 > **브랜치**: `claude/code-cleanup-016T53WurVkfqSVXvW3p2GC4`
-> **목적**: 발표 및 코드 제출을 위한 리포지토리 정리
+> **목적**: 코드 제출을 위한 리포지토리 정리 (최소화 원칙)
 > **기준일**: 2025-12-10
 
 ---
 
 ## 🎯 정리 목표
 
-1. **불필요한 개발 파일 제거** - 임시 문서, 레거시 코드 삭제
-2. **소스 코드 프로덕션화** - console.log, 개발용 주석 제거
-3. **문서 전문화** - 발표/제출에 적합하게 재구성
-4. **코드 가독성 향상** - 함수 설명 주석 정리
+1. **불필요한 파일 완전 제거** - 개발/임시 파일 모두 삭제
+2. **소스 코드 프로덕션화** - console.log, 개발용 주석 완전 제거
+3. **문서 최소화** - 제출에 필요한 문서만 유지
+4. **코드 가독성 향상** - 함수 설명만 간결하게 유지
 
 ---
 
@@ -19,55 +19,65 @@
 
 ### 1.1 루트 디렉토리 정리
 
-**삭제 대상**:
+**삭제 대상** (개발/임시 파일 전체):
 ```
-✗ 4e208b35f1acfe3c314f2e6aa8bb061d.ico/     (폴더 전체, 이미 public/에 복사됨)
-✗ MYPAGE_MODAL_MOBILE_IMPROVEMENT.md        (작업 보고서)
-✗ PLAN_D_COMPLETE_REDESIGN.md               (개발 계획서)
-✗ SESSION_SUMMARY.md                        (세션 요약)
-✗ SESSION_CONTEXT.md                        (개발용 컨텍스트)
-✗ next_tasks.md                             (작업 목록)
-✗ whatsProblem.txt                          (디버그 임시 파일)
-✗ DEVELOPMENT_PRINCIPLES.md                 (개발 원칙)
-✗ openapi.json                              (→ docs/API_SPEC.md로 변환 후 삭제)
-✗ openapi2.json                             (→ docs/API_SPEC.md로 변환 후 삭제)
+✗ 4e208b35f1acfe3c314f2e6aa8bb061d.ico/     (폴더 전체)
+✗ MYPAGE_MODAL_MOBILE_IMPROVEMENT.md
+✗ PLAN_D_COMPLETE_REDESIGN.md
+✗ SESSION_SUMMARY.md
+✗ SESSION_CONTEXT.md
+✗ next_tasks.md
+✗ whatsProblem.txt
+✗ DEVELOPMENT_PRINCIPLES.md
+✗ openapi.json
+✗ openapi2.json
+✗ CODE_CLEANUP_PLAN.md                      (작업 완료 후 삭제)
 ```
 
-**유지**:
+**최종 유지** (필수 파일만):
 ```
-✓ README.md                                 (→ 재작성)
-✓ package.json, package-lock.json
+✓ README.md                                 (재작성)
+✓ package.json
+✓ package-lock.json
 ✓ tsconfig.json
 ✓ next.config.ts
 ✓ tailwind.config.js
 ✓ eslint.config.mjs
 ✓ postcss.config.mjs
 ✓ .gitignore
+✓ src/                                      (소스 코드)
+✓ public/                                   (정리된 아이콘)
+✓ docs/                                     (최소 문서)
 ```
 
 ---
 
 ### 1.2 public/ 디렉토리 정리
 
-**삭제 대상** (Next.js 기본 SVG, 사용하지 않음):
+**삭제 대상**:
 ```
-✗ public/file.svg
-✗ public/globe.svg
-✗ public/next.svg
-✗ public/vercel.svg
-✗ public/window.svg
+✗ public/file.svg                           (Next.js 기본 파일)
+✗ public/globe.svg                          (Next.js 기본 파일)
+✗ public/next.svg                           (Next.js 기본 파일)
+✗ public/vercel.svg                         (Next.js 기본 파일)
+✗ public/window.svg                         (Next.js 기본 파일)
+✗ public/manifest.json                      (src/app/icon.png 사용하므로 불필요)
+✗ public/browserconfig.xml                  (src/app/icon.png 사용하므로 불필요)
+✗ public/favicon-16x16.png                  (중복, src/app/icon.png 사용)
+✗ public/favicon-32x32.png                  (중복, src/app/icon.png 사용)
+✗ public/favicon-96x96.png                  (중복, src/app/icon.png 사용)
+✗ public/favicon.ico                        (중복, src/app/icon.png 사용)
+✗ public/apple-icon-*.png (전체)            (중복, src/app/icon.png 사용)
+✗ public/android-icon-*.png (전체)          (중복, src/app/icon.png 사용)
+✗ public/ms-icon-*.png (전체)               (중복, src/app/icon.png 사용)
 ```
 
-**유지** (프로젝트 아이콘):
+**최종 유지**:
 ```
-✓ public/favicon.ico
-✓ public/favicon-*.png
-✓ public/apple-icon-*.png
-✓ public/android-icon-*.png
-✓ public/ms-icon-*.png
-✓ public/manifest.json
-✓ public/browserconfig.xml
+✓ (없음 - src/app/icon.png만 사용)
 ```
+
+**참고**: Next.js 15는 `src/app/icon.png` 파일만으로 모든 브라우저/플랫폼 favicon 자동 처리
 
 ---
 
@@ -248,13 +258,17 @@ docs/
 └── ui-design-spec.txt
 ```
 
-**새 구조** (4개):
+**새 구조** (2개):
 ```
 docs/
-├── README.md                             🆕 문서 인덱스
 ├── FEATURE_SPECIFICATION.md              ✅ 유지 (기능 명세서)
-├── API_SPEC.md                           🆕 API 명세서 (openapi 기반)
-└── USER_MANUAL.md                        ✅ 유지 (사용자 매뉴얼)
+└── API_SPEC.md                           🆕 API 명세서 (openapi 기반)
+```
+
+**삭제 (불필요)**:
+```
+✗ docs/README.md                          (문서 2개뿐이라 불필요)
+✗ docs/USER_MANUAL.md                     (기능 명세서에 포함됨)
 ```
 
 **삭제 대상**:
@@ -277,32 +291,9 @@ docs/
 
 ---
 
-### 3.3 docs/README.md 생성
+### 3.3 docs/README.md (삭제)
 
-```markdown
-# 📚 문서 인덱스
-
-이 폴더에는 인하대 분실물 센터 프로젝트의 주요 문서가 포함되어 있습니다.
-
-## 문서 목록
-
-### 📋 [FEATURE_SPECIFICATION.md](FEATURE_SPECIFICATION.md)
-- 전체 기능 명세서
-- 페이지별 기능 설명
-- API 엔드포인트 목록
-- 데이터 모델 정의
-
-### 🔌 [API_SPEC.md](API_SPEC.md)
-- API 엔드포인트 상세 명세
-- 요청/응답 형식
-- 인증 방법
-- 에러 코드
-
-### 📖 [USER_MANUAL.md](USER_MANUAL.md)
-- 사용자 가이드
-- 주요 기능 사용법
-- FAQ
-```
+**삭제 이유**: 문서가 2개뿐이므로 인덱스 불필요
 
 ---
 
@@ -376,11 +367,7 @@ docs/
 
 **FEATURE_SPECIFICATION.md**:
 - ✅ 그대로 유지
-- 선택적 업데이트: 버전 정보 (Next.js 15.5.7, React 19.2.1)
-
-**USER_MANUAL.md**:
-- ✅ 그대로 유지
-- 선택적 업데이트: "분실물 찾기" → "인하대 분실물 센터"
+- 버전 정보 업데이트: Next.js 15.5.7, React 19.2.1
 
 ---
 
@@ -428,20 +415,25 @@ JongSul/
 ├── tailwind.config.js
 ├── eslint.config.mjs
 ├── postcss.config.mjs
-├── docs/                        ✅ 4개 문서만
-├── public/                      ✅ 아이콘만
+├── docs/                        ✅ 2개 문서만
 └── src/                         ✅ console.log 제거, 주석 정리
+    ├── app/
+    │   ├── icon.png             ✅ favicon (public/ 대체)
+    │   └── ...
+    └── ...
 ```
+
+**참고**: public/ 폴더 완전 삭제
 
 ---
 
 ## 📊 작업 체크리스트
 
 ### Phase 1: 파일 제거
-- [ ] 루트 디렉토리 임시 파일 9개 삭제
-- [ ] public/에서 Next.js SVG 5개 삭제
+- [ ] 루트 디렉토리 임시 파일 11개 삭제
+- [ ] public/ 폴더 전체 삭제 (32개 파일)
 - [ ] src/lib/data/mockData.ts 삭제
-- [ ] docs/에서 개발 문서 14개 삭제
+- [ ] docs/에서 개발 문서 16개 삭제 (15개 삭제 + USER_MANUAL 삭제)
 
 ### Phase 2: 소스 코드 정리
 - [ ] console.log 약 25개 제거 (8개 파일)
@@ -451,10 +443,8 @@ JongSul/
 
 ### Phase 3: 문서 재구성
 - [ ] README.md 재작성
-- [ ] docs/README.md 생성
 - [ ] docs/API_SPEC.md 생성 (openapi 기반)
-- [ ] FEATURE_SPECIFICATION.md 버전 업데이트 (선택)
-- [ ] USER_MANUAL.md 제목 업데이트 (선택)
+- [ ] FEATURE_SPECIFICATION.md 버전 업데이트
 
 ### Phase 4: 최종 검증
 - [ ] npm run lint (0 errors)
@@ -468,18 +458,20 @@ JongSul/
 
 **정리 전**:
 ```
-- 파일 개수: ~100개
-- 문서 개수: 17개 (docs/) + 10개 (루트)
+- 전체 파일: ~130개
+- 루트 문서: 11개
+- docs/ 문서: 17개
+- public/ 파일: 32개
 - console.log: 25개
-- 개발 히스토리 주석: 다수
 ```
 
 **정리 후**:
 ```
-- 파일 개수: ~70개 (30% 감소)
-- 문서 개수: 4개 (docs/) + 1개 (루트)
+- 전체 파일: ~50개 (60% 감소)
+- 루트 문서: 1개 (README.md)
+- docs/ 문서: 2개 (FEATURE_SPECIFICATION, API_SPEC)
+- public/ 파일: 0개 (src/app/icon.png만 사용)
 - console.log: 0개
-- 주석: 함수 설명만 간결하게
 ```
 
 **품질 향상**:
