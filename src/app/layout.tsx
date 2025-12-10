@@ -3,8 +3,8 @@ import './globals.css';
 import { AuthProvider } from '@/lib/contexts/AuthContext';
 
 export const metadata: Metadata = {
-  title: '분실물 찾기',
-  description: '분실물 관리 시스템',
+  title: '인하대 분실물 센터',
+  description: '인하대학교 분실물 관리 시스템',
 };
 
 export default function RootLayout({
