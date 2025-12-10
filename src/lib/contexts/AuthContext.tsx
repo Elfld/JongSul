@@ -79,12 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const errorData = await response.json();
         const errorMessage = errorData.error || '로그인에 실패했습니다.';
 
-        // 401, 404는 정상적인 비즈니스 로직 (로그 안 남김)
-        // 500번대나 네트워크 에러만 로깅
-        if (response.status >= 500) {
-          console.error('Login server error:', response.status, errorData);
-        }
-
         throw new Error(errorMessage);
       }
 
@@ -99,10 +93,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userInfo);
       localStorage.setItem('user', JSON.stringify(userInfo));
     } catch (error) {
-      // Error 객체가 아닌 경우만 로깅 (네트워크 에러 등)
-      if (!(error instanceof Error)) {
-        console.error('Login network error:', error);
-      }
       throw error;
     }
   };
@@ -140,12 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const errorData = await response.json();
         const errorMessage = errorData.error || '회원가입에 실패했습니다.';
 
-        // 409(중복), 400(유효성)은 정상 비즈니스 로직 (로그 안 남김)
-        // 500번대만 로깅
-        if (response.status >= 500) {
-          console.error('Register server error:', response.status, errorData);
-        }
-
         throw new Error(errorMessage);
       }
 
@@ -154,10 +138,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 자동 로그인 안 함 - UI에서 로그인 페이지로 이동
       await response.json();
     } catch (error) {
-      // Error 객체가 아닌 경우만 로깅 (네트워크 에러 등)
-      if (!(error instanceof Error)) {
-        console.error('Register network error:', error);
-      }
       throw error;
     }
   };

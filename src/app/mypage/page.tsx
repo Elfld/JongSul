@@ -123,8 +123,7 @@ function MyPageContent() {
           const data: MyItemDetailResponse = await response.json();
           setSelectedDetailData(data);
         }
-      } catch (error) {
-        console.error('Failed to fetch detail:', error);
+      } catch {
       } finally {
         setDetailLoading(false);
       }

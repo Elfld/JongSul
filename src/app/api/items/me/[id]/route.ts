@@ -33,7 +33,6 @@ export async function GET(
   }
 
   const externalUrl = `${apiBaseUrl}/items/me/${itemId}`;
-  console.log('[MyPage 상세] 외부 API 호출:', externalUrl);
 
   try {
     // 외부 API 호출
@@ -47,25 +46,8 @@ export async function GET(
 
     const data = await response.json();
 
-    // 성공 로깅
-    if (response.ok) {
-      console.log('[MyPage 상세] 성공:', {
-        status: response.status,
-        itemId,
-        hasPickupCode: !!data.pickup_code,
-      });
-    }
-
     // 에러 처리
     if (!response.ok) {
-      // 에러 로깅
-      console.error('[MyPage 상세] 외부 API 에러:', {
-        status: response.status,
-        statusText: response.statusText,
-        itemId,
-        error: data,
-      });
-
       // 401: 토큰 만료/유효하지 않음
       if (response.status === 401) {
         return NextResponse.json(
@@ -100,14 +82,7 @@ export async function GET(
     // 성공 응답
     return NextResponse.json(data);
 
-  } catch (error) {
-    // 네트워크 오류 로깅
-    console.error('[MyPage 상세] 네트워크 에러:', {
-      itemId,
-      error: error instanceof Error ? error.message : error,
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-
+  } catch {
     return NextResponse.json(
       { error: '네트워크 오류가 발생했습니다.' },
       { status: 500 }

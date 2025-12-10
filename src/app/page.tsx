@@ -71,8 +71,7 @@ function HomeContent() {
       try {
         const tags = await TagService.fetchAllTags();
         setAvailableTags(tags);
-      } catch (error) {
-        console.error('Failed to load tags:', error);
+      } catch {
       } finally {
         setTagsLoading(false);
       }

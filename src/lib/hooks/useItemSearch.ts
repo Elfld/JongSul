@@ -47,7 +47,6 @@ export function useItemSearch() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch items';
       setError(errorMessage);
-      console.error(errorMessage, err);
       return null;
     } finally {
       setLoading(false);
@@ -124,7 +123,6 @@ export function useItemSearch() {
 //   } catch (err) {
 //     const errorMessage = err instanceof Error ? err.message : 'Failed to fetch items';
 //     setError(errorMessage);
-//     console.error(errorMessage, err);
 //     return null;
 //   } finally {
 //     setLoading(false);

@@ -36,8 +36,7 @@ export function useMyReservedIds() {
           const ids = data.map((item: { id: number }) => item.id);
           setMyReservedIds(ids);
         }
-      } catch (error) {
-        console.error('Failed to fetch my reserved items:', error);
+      } catch {
       }
     };
 
