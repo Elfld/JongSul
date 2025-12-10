@@ -105,7 +105,6 @@ export default function RegisterPage() {
         setIsEmailVerified(true);
         setError('');
       } else {
-        console.log('[인증 에러 응답]', data);
         setError(data.error || '인증번호가 올바르지 않습니다.');
         setVerificationCode('');
         setIsEmailVerified(false);

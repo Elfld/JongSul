@@ -27,8 +27,7 @@ export default function NotificationSettings() {
       try {
         const tags = await TagService.fetchAllTags();
         setCategories(tags);
-      } catch (error) {
-        console.error('Failed to load categories:', error);
+      } catch {
       } finally {
         setCategoriesLoading(false);
       }
@@ -43,8 +42,7 @@ export default function NotificationSettings() {
     if (stored) {
       try {
         setSelectedCategories(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse notification settings:', e);
+      } catch {
       }
     }
   }, []);

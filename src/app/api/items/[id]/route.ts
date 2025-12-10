@@ -29,8 +29,6 @@ export async function GET(
     // 외부 API URL 생성
     const externalUrl = `${apiBaseUrl}/items/${itemId}`;
 
-    console.log('[API Proxy] Fetching item:', externalUrl);
-
     // 외부 API 호출
     const response = await fetch(externalUrl);
 
@@ -42,16 +40,13 @@ export async function GET(
         );
       }
 
-      const errorText = await response.text();
-      console.error('[API Proxy] External API error:', response.status, errorText);
       throw new Error(`External API error: ${response.status}`);
     }
 
     const data = await response.json();
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('API Proxy Error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch item' },
       { status: 500 }

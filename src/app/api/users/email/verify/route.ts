@@ -75,12 +75,6 @@ export async function POST(request: NextRequest) {
     // 3. 외부 API 호출
     const externalUrl = `${apiBaseUrl}/users/email/verify`;
 
-    console.log('[인증번호 검증 프록시] 외부 API 호출:', externalUrl);
-    console.log('[인증번호 검증 프록시] Request Body:', {
-      email: body.email,
-      code: body.code,
-    });
-
     const response = await fetch(externalUrl, {
       method: 'POST',
       headers: {
@@ -96,11 +90,6 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
 
-      console.error('[인증번호 검증 프록시] 외부 API 에러:', {
-        status: response.status,
-        error: errorData,
-      });
-
       // 4-1. 에러 메시지 변환
       const errorMessage = formatBackendError(
         errorData,
@@ -113,16 +102,9 @@ export async function POST(request: NextRequest) {
     // 5. 성공 응답
     const data = await response.json();
 
-    console.log('[인증번호 검증 프록시] 성공:', {
-      email: body.email,
-      message: data.message,
-      has_token: !!data.verification_token,
-    });
-
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     // 6. 네트워크 에러 등 예외 처리
-    console.error('[인증번호 검증 프록시] Exception:', error);
     return NextResponse.json(
       { error: '서버 오류가 발생했습니다.' },
       { status: 500 }

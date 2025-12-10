@@ -32,7 +32,6 @@ export async function POST(
   }
 
   const externalUrl = `${apiBaseUrl}/items/${itemId}/claim`;
-  console.log('[Claim 프록시] 외부 API 호출:', externalUrl);
 
   try {
     // 외부 API 호출
@@ -46,25 +45,8 @@ export async function POST(
 
     const data = await response.json();
 
-    // 성공 로깅
-    if (response.ok) {
-      console.log('[Claim 프록시] 성공:', {
-        status: response.status,
-        itemId,
-        hasPickupCode: !!data.pickup_code,
-      });
-    }
-
     // 에러 처리
     if (!response.ok) {
-      // 에러 로깅 (모든 에러)
-      console.error('[Claim 프록시] 외부 API 에러:', {
-        status: response.status,
-        statusText: response.statusText,
-        itemId,
-        error: data,
-      });
-
       // 400: Bad Request (이미 예약된 경우 등)
       if (response.status === 400) {
         // 외부 API detail에서 "claimed" 관련 메시지 감지
@@ -133,14 +115,7 @@ export async function POST(
     // 성공 응답
     return NextResponse.json(data);
 
-  } catch (error) {
-    // 네트워크 오류 로깅
-    console.error('[Claim 프록시] 네트워크 에러:', {
-      itemId,
-      error: error instanceof Error ? error.message : error,
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-
+  } catch {
     return NextResponse.json(
       { error: '네트워크 오류가 발생했습니다.' },
       { status: 500 }
