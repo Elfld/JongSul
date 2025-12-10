@@ -257,13 +257,5 @@ npm run lint
 
 ---
 
-## 제작
-
-- **개발자**: Elfld
-- **협업**: Claude AI
-- **기간**: 2024-2025
-
----
-
 **Version**: 1.1.0
 **Last Updated**: 2025-12-10
